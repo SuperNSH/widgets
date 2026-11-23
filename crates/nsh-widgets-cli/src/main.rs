@@ -218,7 +218,8 @@ fn check(dir: &Path) -> anyhow::Result<()> {
         }
     }
     if problems.is_empty() {
-        println!("ok: {} widget kinds", config.widgets.len());
+        let n = config.widgets.len();
+        println!("ok: {n} widget {}", if n == 1 { "kind" } else { "kinds" });
         Ok(())
     } else {
         bail!("{}", problems.join("\n"))
