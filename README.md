@@ -40,7 +40,7 @@ cargo install --git https://github.com/SuperNSH/widgets nsh-widgets-cli
 
 ## Status
 
-Version 0.1.0. Verified on 23 and 24 November 2026; details and screenshots in [docs/status.md](docs/status.md).
+Version 0.1.0 ([release](https://github.com/SuperNSH/widgets/releases/tag/v0.1.0)). Verified on 23 and 24 November 2026, including a fresh app installing it with `nsh add github:SuperNSH/widgets@^0.1`; details and screenshots in [docs/status.md](docs/status.md).
 
 - **iOS 27 simulator**: the gallery example shows all six kinds in the widget gallery, including real gradients and the 21 shared icons. Two `+1` presses in a placed Counter wrote `count: 2` and two events, and the app showed both.
 - **Android 17 (API 37) emulator**: the launcher lists every kind. Widget presses changed the counter with the app idle, the app saw them, and an app-side change redrew the widget. A Tasks switch toggled in the widget showed up in the app. Gradients draw as bitmaps behind the content, including on an inner rounded row.

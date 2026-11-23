@@ -65,4 +65,8 @@ Test output is in `evidence/tests/`. Each suite was seen to fail once against de
 - Lock-screen rendering, checked on a device
 - Tests on physical devices
 
-CI: run https://github.com/SuperNSH/widgets/actions/runs/45179814280 (commit `ca211e9`) passed all 11 jobs: format; rust on ubuntu, macos and windows; clippy for aarch64-apple-ios, aarch64-apple-ios-sim, aarch64-linux-android and wasm32-unknown-unknown; the Android library rebuild; the gallery's extension build on macOS; and the TypeScript checks.
+## Release
+
+- Tag `v0.1.0` on `fe8cb17`. In a blank app, `nsh add github:SuperNSH/widgets@^0.1` resolved to 0.1.0 at that commit, `nsh check` type-checked imports of `nsh-widgets` and `nsh-widgets/kit`, `nsh-widgets init` and `build` ran, and `nsh package` built both the Android APK (54 `nsh_widgets` entries) and the iOS simulator app (with `NshWidgets.appex`). On the emulator the installed APK registered `NshWidgetProvider$Slot1` as a widget provider.
+- [Release v0.1.0](https://github.com/SuperNSH/widgets/releases/tag/v0.1.0) carries `nsh-widgets` for aarch64 and x86_64 macOS, x86_64 Linux and x86_64 Windows, each with a SHA-256 file. The aarch64 macOS archive was downloaded, checked against its SHA-256 and run (`help`, `show`).
+- CI on `fe8cb17`: run https://github.com/SuperNSH/widgets/actions/runs/45248139253 passed all 13 jobs: format; rust on ubuntu, macos and windows; clippy for aarch64-apple-ios, aarch64-apple-ios-sim, aarch64-linux-android and wasm32-unknown-unknown; the AAR check; the extension build on macOS; the gallery type-check on NSH nightly; and the TypeScript checks.
