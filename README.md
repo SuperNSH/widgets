@@ -89,3 +89,5 @@ nsh_widgets::update_data("Counter", &serde_json::json!({ "count": 3 }))?;
 ## Licence
 
 MIT. See [LICENSE](LICENSE).
+
+CI: run https://github.com/SuperNSH/widgets/actions/runs/45179814280 (commit `ca211e9`) passed all 11 jobs: format; rust on ubuntu, macos and windows; clippy for aarch64-apple-ios, aarch64-apple-ios-sim, aarch64-linux-android and wasm32-unknown-unknown; the Android library rebuild; the gallery's extension build on macOS; and the TypeScript checks.

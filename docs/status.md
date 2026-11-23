@@ -56,3 +56,5 @@ Test output is in `evidence/tests/` (8 store tests, 7 CLI tests, 12 TS tests); e
 - Publishing the TS package and the crates
 - macOS verification with this library build
 - Tests on physical devices
+
+CI: run https://github.com/SuperNSH/widgets/actions/runs/45179814280 (commit `ca211e9`) passed all 11 jobs: format; rust on ubuntu, macos and windows; clippy for aarch64-apple-ios, aarch64-apple-ios-sim, aarch64-linux-android and wasm32-unknown-unknown; the Android library rebuild; the gallery's extension build on macOS; and the TypeScript checks.
