@@ -316,8 +316,13 @@ fn options_activities_and_controls_reach_the_ios_bundle() {
     assert!(ios.contains("enum NshOption0: String, AppEnum") && ios.contains("case o0 = \"Karachi\", o1 = \"Tokyo\""));
     assert!(ios.contains("nshUIConfigurable(\"Weather\", NshConfig0.self"));
     assert!(ios.contains("NshActivityWidget()"));
-    assert!(ios.contains("ControlWidgetToggle(\"Ship it\"") && ios.contains("NshToggleValue(kind: \"Tasks\", key: \"t1\")"));
-    assert!(ios.contains("NshActionIntent(kind: \"Counter\", action: \"inc:count\")") && ios.contains("systemImage: \"plus\""));
+    assert!(
+        ios.contains("ControlWidgetToggle(\"Ship it\"") && ios.contains("NshToggleValue(kind: \"Tasks\", key: \"t1\")")
+    );
+    assert!(
+        ios.contains("NshActionIntent(kind: \"Counter\", action: \"inc:count\")")
+            && ios.contains("systemImage: \"plus\"")
+    );
     let mac = apple::bundle_source(&c, Platform::Mac);
     assert!(!mac.contains("NshActivityWidget") && !mac.contains("ControlWidget") && mac.contains("NshConfig0"));
 }
@@ -336,7 +341,14 @@ fn bad_options_and_controls_are_listed() {
     }))
     .unwrap();
     let p = bad.problems().join("\n");
-    for e in ["options need a title", "unique, not empty", "a toggle needs a \"key\"", "a button needs an \"action\"", "is not toggle or button", "\"rocket\" is not in the shared set"] {
+    for e in [
+        "options need a title",
+        "unique, not empty",
+        "a toggle needs a \"key\"",
+        "a button needs an \"action\"",
+        "is not toggle or button",
+        "\"rocket\" is not in the shared set",
+    ] {
         assert!(p.contains(e), "missing {e:?} in\n{p}");
     }
 }
@@ -346,18 +358,39 @@ fn android_gets_option_metadata_configure_screen_and_tiles() {
     let c = full_config();
     let m = android::manifest(&c);
     assert!(m.contains("android:name=\"dev.supernsh.widgets.options\" android:value=\"Karachi|Tokyo\""));
-    assert!(m.contains("NshTileService$Slot1") && m.contains("android:value=\"t1\"") && m.contains("@drawable/nsh_widgets_icon_check"));
+    assert!(
+        m.contains("NshTileService$Slot1")
+            && m.contains("android:value=\"t1\"")
+            && m.contains("@drawable/nsh_widgets_icon_check")
+    );
     assert!(m.contains("NshTileService$Slot2") && m.contains("android:value=\"inc:count\""));
-    assert!(android::provider_info(0, &c.widgets[0]).contains("android:configure=\"dev.supernsh.widgets.NshWidgetConfigureActivity\""));
+    assert!(
+        android::provider_info(0, &c.widgets[0])
+            .contains("android:configure=\"dev.supernsh.widgets.NshWidgetConfigureActivity\"")
+    );
     assert!(!android::provider_info(1, &c.widgets[1]).contains("android:configure"));
 }
 
 #[test]
 fn live_activities_turn_on_the_info_plist_key() {
     let mut nsh = json!({ "id": "x" });
-    nshjson::apply(&mut nsh, &full_config(), nshjson::Built { ios: true, ..Default::default() });
+    nshjson::apply(
+        &mut nsh,
+        &full_config(),
+        nshjson::Built {
+            ios: true,
+            ..Default::default()
+        },
+    );
     assert_eq!(nsh["ios"]["infoPlist"]["NSSupportsLiveActivities"], true);
-    nshjson::apply(&mut nsh, &config(1), nshjson::Built { ios: true, ..Default::default() });
+    nshjson::apply(
+        &mut nsh,
+        &config(1),
+        nshjson::Built {
+            ios: true,
+            ..Default::default()
+        },
+    );
     assert!(nsh["ios"]["infoPlist"].get("NSSupportsLiveActivities").is_none());
 }
 
@@ -370,8 +403,14 @@ fn plasmoids_name_their_command_and_store() {
     let five = crate::plasma::main_qml(5, "Steps", "nsh-widgets", "--dir /tmp/s").unwrap();
     assert!(five.contains("PlasmaCore.DataSource") && five.contains("Plasmoid.fullRepresentation"));
     assert!(crate::plasma::main_qml(4, "S", "x", "y").is_err());
-    assert_eq!(crate::plasma::metadata(5, "id", "N", "D")["X-Plasma-MainScript"], "ui/main.qml");
-    assert_eq!(crate::plasma::metadata(6, "id", "N", "D")["X-Plasma-API-Minimum-Version"], "6.0");
+    assert_eq!(
+        crate::plasma::metadata(5, "id", "N", "D")["X-Plasma-MainScript"],
+        "ui/main.qml"
+    );
+    assert_eq!(
+        crate::plasma::metadata(6, "id", "N", "D")["X-Plasma-API-Minimum-Version"],
+        "6.0"
+    );
 }
 
 #[test]
@@ -382,7 +421,10 @@ fn apply_runs_actions_on_a_store_and_queues_events() {
         app: dir.path().into(),
         only: vec![],
         group: None,
-        source: crate::source::Source { dir: Some(dir.path().into()), ..Default::default() },
+        source: crate::source::Source {
+            dir: Some(dir.path().into()),
+            ..Default::default()
+        },
         out: None,
         format: "text".into(),
         follow: false,
@@ -395,12 +437,22 @@ fn apply_runs_actions_on_a_store_and_queues_events() {
     crate::source::apply(&args, "inc:n").unwrap();
     crate::source::apply(&args, "inc:n").unwrap();
     let data: serde_json::Value =
-        serde_json::from_str(&std::fs::read_to_string(dir.path().join("nsh/widgets/Tasks/data.json")).unwrap()).unwrap();
+        serde_json::from_str(&std::fs::read_to_string(dir.path().join("nsh/widgets/Tasks/data.json")).unwrap())
+            .unwrap();
     assert_eq!(data["data"], json!({ "t1": true, "n": 2 }));
     let events = std::fs::read_to_string(dir.path().join("nsh/widgets/actions.jsonl")).unwrap();
     assert_eq!(events.lines().count(), 3);
     assert!(crate::source::apply(&args, "rm:x").is_err());
-    let w = crate::source::Widget { kind: "Tasks".into(), snapshot: json!({ "v": 1 }), data: data["data"].as_object().unwrap().clone(), families: vec![] };
-    let ir: serde_json::Value = serde_json::from_str(&crate::source::show_text(&w, "ir", 7, String::new()).unwrap()).unwrap();
-    assert_eq!(ir, json!({ "snapshot": { "v": 1 }, "data": { "t1": true, "n": 2 }, "now": 7 }));
+    let w = crate::source::Widget {
+        kind: "Tasks".into(),
+        snapshot: json!({ "v": 1 }),
+        data: data["data"].as_object().unwrap().clone(),
+        families: vec![],
+    };
+    let ir: serde_json::Value =
+        serde_json::from_str(&crate::source::show_text(&w, "ir", 7, String::new()).unwrap()).unwrap();
+    assert_eq!(
+        ir,
+        json!({ "snapshot": { "v": 1 }, "data": { "t1": true, "n": 2 }, "now": 7 })
+    );
 }
