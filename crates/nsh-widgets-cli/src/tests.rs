@@ -59,10 +59,10 @@ fn unknown_config_keys_are_errors() {
 
 #[test]
 fn the_bundle_names_every_kind_and_groups_by_ten() {
-    let small = apple::bundle_source(&config(3));
+    let small = apple::bundle_source(&config(3), Platform::Simulator);
     assert!(small.contains("nshUIConfiguration(\"K0\", \"Kind \\\"0\\\"\", \"\", [.systemSmall, .systemLarge])"));
     assert!(small.contains("@main\nstruct NshWidgetsBundle") && !small.contains("NshKindGroup"));
-    let big = apple::bundle_source(&config(12));
+    let big = apple::bundle_source(&config(12), Platform::Simulator);
     assert!(big.contains("struct NshKindGroup0") && big.contains("NshKindGroup1().body"));
     assert_eq!(big.matches("NshKind11()").count(), 1);
 }
@@ -165,4 +165,119 @@ fn nsh_json_keeps_the_apps_keys_and_replaces_only_ours() {
         },
     );
     assert!(only_android.get("ios").is_none());
+}
+
+#[test]
+fn lock_screen_families_are_ios_only() {
+    let c: Config = serde_json::from_value(json!({ "appGroup": "group.x", "widgets": [
+        { "kind": "Steps", "name": "Steps", "families": ["rectangular", "small"] },
+        { "kind": "Ring", "name": "Ring", "families": ["circular"] }
+    ]}))
+    .unwrap();
+    assert!(c.problems().is_empty());
+    let ios = apple::bundle_source(&c, Platform::Device);
+    assert!(ios.contains("[.accessoryRectangular, .systemSmall]") && ios.contains("[.accessoryCircular]"));
+    let mac = apple::bundle_source(&c, Platform::Mac);
+    assert!(mac.contains("[.systemSmall]") && !mac.contains("accessory") && !mac.contains("NshKind1()"));
+    assert_eq!(
+        c.widgets[0].cells(),
+        [2, 2],
+        "Android sizes come from the first home-screen family"
+    );
+}
+
+mod render_tests {
+    use serde_json::{Map, Value, json};
+
+    use crate::render::{self, Ctx};
+
+    fn data(v: Value) -> Map<String, Value> {
+        v.as_object().unwrap().clone()
+    }
+
+    fn ctx<'a>(d: &'a Map<String, Value>, family: &'a str) -> Ctx<'a> {
+        Ctx {
+            data: d,
+            family,
+            dark: false,
+            now_ms: 10_000_000,
+            clock: "09:41".into(),
+        }
+    }
+
+    #[test]
+    fn templates_fill_like_the_renderers() {
+        let d = data(json!({ "n": 3.0, "p": 0.5, "s": "hi", "b": true }));
+        assert_eq!(render::fill("{n} {p} {s} {b} {missing}", &d), "3 0.5 hi true {missing}");
+    }
+
+    #[test]
+    fn text_follows_the_tree() {
+        let d = data(json!({ "count": 2, "p": 0.3, "week": [1, 4, 2], "t1": true, "at": 9_000_000 }));
+        let tree = json!({ "t": "col", "children": [
+            { "t": "row", "children": [
+                { "t": "icon", "name": "bolt" }, { "t": "text", "text": "TITLE" },
+                { "t": "text", "text": "note", "style": { "hide": ["small"] } } ] },
+            { "t": "text", "text": "{count}" },
+            { "t": "progress", "key": "p" },
+            { "t": "bars", "key": "week" },
+            { "t": "toggle", "key": "t1", "text": "Ship" },
+            { "t": "row", "children": [{ "t": "timer", "key": "at" }, { "t": "clock" }, { "t": "button", "text": "+1", "action": "inc:count" }] },
+            { "t": "rotate", "interval": 5, "children": [{ "t": "text", "text": "a" }, { "t": "text", "text": "b" }] }
+        ]});
+        let medium = render::text_lines(&tree, &ctx(&d, "medium"));
+        assert_eq!(
+            medium,
+            [
+                "⚡ TITLE note",
+                "2",
+                "▓▓▓░░░░░░░ 30%",
+                "▃█▅",
+                "☑ Ship",
+                "16:40 09:41 [+1]",
+                "a"
+            ]
+        );
+        assert_eq!(render::text_lines(&tree, &ctx(&d, "small"))[0], "⚡ TITLE");
+    }
+
+    #[test]
+    fn html_frames_each_family_with_the_root_background() {
+        let d = data(json!({ "steps": 9039 }));
+        let snap = json!({ "v": 1, "root": { "t": "col", "style": { "gradient": { "from": ["#10b981", "#047857"], "to": ["#2563eb", "#1e40af"], "dir": "br" }, "pad": [8, 8, 8, 8] },
+            "children": [{ "t": "text", "text": "{steps}", "style": { "fg": ["#ffffff", "#ffffff"], "size": 30, "weight": "bold" } }] },
+            "accessory": { "t": "text", "text": "{steps} steps" } });
+        let small = render::widget_html(&snap, &ctx(&d, "small"));
+        assert!(
+            small.contains("width:170px;height:170px")
+                && small.contains("linear-gradient(to bottom right, #10b981, #2563eb)")
+        );
+        assert!(
+            small.contains("padding:8px 8px 8px 8px") && small.contains(">9039<") && small.contains("font-weight:700")
+        );
+        let lock = render::widget_html(&snap, &ctx(&d, "rectangular"));
+        assert!(lock.contains("9039 steps") && !lock.contains("linear-gradient"));
+    }
+
+    #[test]
+    fn waybar_puts_the_lock_screen_tree_on_the_bar() {
+        let w = crate::source::Widget {
+            kind: "Steps".into(),
+            snapshot: json!({ "v": 1, "root": { "t": "col", "children": [{ "t": "text", "text": "STEPS" }, { "t": "text", "text": "{steps}" }] },
+                "accessory": { "t": "text", "text": "{steps} steps" } }),
+            data: data(json!({ "steps": 12 })),
+            families: vec![],
+        };
+        let out: Value =
+            serde_json::from_str(&crate::source::show_text(&w, "waybar", 0, "09:41".into()).unwrap()).unwrap();
+        assert_eq!(
+            out,
+            json!({ "text": "12 steps", "tooltip": "STEPS\n12", "class": "Steps" })
+        );
+        assert_eq!(
+            crate::source::show_text(&w, "text", 0, String::new()).unwrap(),
+            "STEPS\n12"
+        );
+        assert!(crate::source::show_text(&w, "xml", 0, String::new()).is_err());
+    }
 }

@@ -4,8 +4,13 @@
     {
       "name": "nsh-widgets",
       "version": "0.1.0",
-      "path": "../../crates/nsh-widgets",
-      "module": "nsh-widgets/native"
+      "path": "../..",
+      "module": "nsh-widgets/native",
+      "exports": {
+        "nsh-widgets": "packages/nsh-widgets/src/index.ts",
+        "nsh-widgets/base": "packages/nsh-widgets/src/base.ts",
+        "nsh-widgets/kit": "packages/nsh-widgets/src/kit.ts"
+      }
     }
   ]
 }

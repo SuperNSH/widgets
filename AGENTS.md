@@ -11,13 +11,18 @@ Hard rules for humans and coding agents in this repo.
 - Status claims in README and docs need evidence under `docs/evidence/`: a screenshot someone looked at, or a command and its output. A claim with no evidence is marked unverified.
 - The renderers stay generic. No widget-specific code in `NshWidgets.swift` or the Java renderer; a widget is data, never a native class.
 - The kit (`packages/nsh-widgets/src/kit.ts`) compiles only to base nodes. A kit change never needs a renderer change.
-- An IR change lands in four places together: the TS types (`base.ts`), the check in `crates/nsh-widgets/src/store.rs`, the Swift renderer and the Java renderer. Update [docs/ir.md](docs/ir.md) and [docs/capabilities.md](docs/capabilities.md) with it.
-- After changing the Java sources, layouts or drawables, rebuild `crates/nsh-widgets/android/nsh-widgets.aar` with `scripts/build-aar.sh`. The AAR is committed.
+- An IR change lands in four places together: the TS types (`base.ts`), the check in `src/store.rs`, the Swift renderer, the Java renderer and the CLI's `render.rs` (preview and show). Update [docs/ir.md](docs/ir.md) and [docs/capabilities.md](docs/capabilities.md) with it.
+- After changing the Java sources, layouts or drawables, rebuild `android/nsh-widgets.aar` with `scripts/build-aar.sh`. The AAR is committed, and CI's `scripts/check-aar.sh` fails when it is stale.
 
 ## Checks
 
 - `cargo fmt --all -- --check`
 - `cargo clippy --all-targets -- -D warnings`
-- `cargo test -p nsh-widgets`
+- `cargo test --workspace`
 - in `packages/nsh-widgets`: `nsh check`, `nsh test`
+- in `examples/gallery`: `nsh check` (NSH main or nightly)
 - for a change that reaches a renderer: build the gallery with `nsh-widgets build`, package it, place the widget, and save a screenshot under `docs/evidence/<platform>/`
+
+## Releasing
+
+Bump the version in `Cargo.toml` (root and `[workspace.package]`), `nsh.json` and `packages/nsh-widgets/package.json` together, add the CHANGELOG entry, then tag `vX.Y.Z`. NSH resolves `"version"` requirements against these tags, and the Release workflow attaches the `nsh-widgets` binaries.

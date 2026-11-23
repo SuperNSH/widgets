@@ -98,6 +98,11 @@ public final class NshWidgets {
     }
 
     static void box(Context c, RemoteViews v, int id, JSONObject style) {
+        box(c, v, id, style, true);
+    }
+
+    /** Padding, background and radius. A container's gradient is drawn by layered(); other nodes fall back to its first colour. */
+    static void box(Context c, RemoteViews v, int id, JSONObject style, boolean gradientFallback) {
         if (style == null) return;
         JSONArray pad = style.optJSONArray("pad");
         if (pad != null && pad.length() == 4) {
@@ -105,13 +110,48 @@ public final class NshWidgets {
         }
         JSONArray bg = style.optJSONArray("bg");
         JSONObject grad = style.optJSONObject("gradient");
-        // RemoteViews cannot draw a gradient from code: use the gradient's first colour.
-        if (bg == null && grad != null) bg = grad.optJSONArray("from");
+        if (bg == null && grad != null && gradientFallback) bg = grad.optJSONArray("from");
         pairColor(c, v, id, "setBackgroundColor", bg);
         double r = style.optDouble("radius", 0);
         if (r > 0 && Build.VERSION.SDK_INT >= 31) {
             v.setViewOutlinePreferredRadius(id, (float) Math.min(r, 200), TypedValue.COMPLEX_UNIT_DIP);
         }
+    }
+
+    static boolean night(Context c) {
+        return (c.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    /**
+     * RemoteViews has no gradient drawable a widget can set from code, so the gradient is drawn into a
+     * small bitmap that an ImageView stretches behind the content. It follows dark mode at the next redraw.
+     */
+    static android.graphics.Bitmap gradientBitmap(Context c, JSONObject grad) {
+        int i = night(c) ? 1 : 0;
+        JSONArray from = grad.optJSONArray("from"), to = grad.optJSONArray("to");
+        int a = color(from == null ? "#000000" : from.optString(i)), b = color(to == null ? "#000000" : to.optString(i));
+        String dir = grad.optString("dir", "b");
+        int w = dir.equals("b") ? 2 : 48, h = dir.equals("r") ? 2 : 48;
+        android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888);
+        android.graphics.Paint paint = new android.graphics.Paint();
+        paint.setShader(new android.graphics.LinearGradient(0, 0, dir.equals("b") ? 0 : w, dir.equals("r") ? 0 : h, a, b,
+            android.graphics.Shader.TileMode.CLAMP));
+        new android.graphics.Canvas(bmp).drawRect(0, 0, w, h, paint);
+        return bmp;
+    }
+
+    /** Wraps `inner` in a layer that draws the style's gradient behind it, with the style's corner radius. */
+    static RemoteViews layered(Context c, RemoteViews inner, JSONObject style, boolean fill) {
+        JSONObject grad = style == null ? null : style.optJSONObject("gradient");
+        if (grad == null) return inner;
+        RemoteViews layer = new RemoteViews(c.getPackageName(), res(c, "layout", fill ? "nsh_widgets_layer_fill" : "nsh_widgets_layer"));
+        layer.setImageViewBitmap(res(c, "id", "nsh_widgets_layer_bg"), gradientBitmap(c, grad));
+        layer.addView(res(c, "id", "nsh_widgets_layer_box"), inner);
+        double r = style.optDouble("radius", 0);
+        if (r > 0 && Build.VERSION.SDK_INT >= 31) {
+            layer.setViewOutlinePreferredRadius(res(c, "id", "nsh_widgets_layer"), (float) Math.min(r, 200), TypedValue.COMPLEX_UNIT_DIP);
+        }
+        return layer;
     }
 
     static RemoteViews gap(Context c, double size) {
@@ -139,7 +179,9 @@ public final class NshWidgets {
         return PendingIntent.getBroadcast(c, req[0]++, run, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    static final String[] ICONS = {"star", "bolt", "check", "play", "flame"};
+    /** The shared icon set: SF Symbols on Apple, these vector drawables here ("arrow-up" is nsh_widgets_icon_arrow_up). */
+    static final String[] ICONS = {"star", "bolt", "check", "play", "pause", "flame", "plus", "minus", "arrow-up", "arrow-down",
+        "heart", "home", "person", "bell", "clock", "calendar", "cloud", "sun", "moon", "drop", "music"};
 
     static RemoteViews build(Context c, JSONObject node, JSONObject data, String kind, boolean inRow, int[] req, String family) {
         String t = node.optString("t");
@@ -156,7 +198,7 @@ public final class NshWidgets {
                     : (style != null && style.optBoolean("grow") ? "nsh_widgets_col_fill" : "nsh_widgets_col");
                 RemoteViews v = new RemoteViews(pkg, res(c, "layout", layout));
                 int id = res(c, "id", "nsh_widgets_box");
-                box(c, v, id, style);
+                box(c, v, id, style, false);
                 JSONArray kids = node.optJSONArray("children");
                 double g = style == null ? 0 : style.optDouble("gap", 0);
                 if (kids != null) {
@@ -165,7 +207,7 @@ public final class NshWidgets {
                         v.addView(id, build(c, kids.optJSONObject(i), data, kind, row, req, family));
                     }
                 }
-                return v;
+                return layered(c, v, style, !row && style != null && style.optBoolean("grow"));
             }
             case "spacer":
                 return new RemoteViews(pkg, res(c, "layout", inRow ? "nsh_widgets_hspacer" : "nsh_widgets_vspacer"));
@@ -240,7 +282,7 @@ public final class NshWidgets {
                 RemoteViews v = new RemoteViews(pkg, res(c, "layout", "nsh_widgets_icon"));
                 int id = res(c, "id", "nsh_widgets_icon");
                 String name = node.optString("name");
-                int drawable = res(c, "drawable", "nsh_widgets_icon_" + (java.util.Arrays.asList(ICONS).contains(name) ? name : "star"));
+                int drawable = res(c, "drawable", "nsh_widgets_icon_" + (java.util.Arrays.asList(ICONS).contains(name) ? name.replace('-', '_') : "star"));
                 v.setImageViewResource(id, drawable);
                 if (style != null) {
                     pairColor(c, v, id, "setColorFilter", style.optJSONArray("fg"));
@@ -306,11 +348,11 @@ public final class NshWidgets {
     static RemoteViews views(Context c, String kind, String family) {
         String pkg = c.getPackageName();
         RemoteViews root = new RemoteViews(pkg, res(c, "layout", "nsh_widgets_root"));
-        int rootId = android.R.id.background;
+        int frameId = android.R.id.background, rootId = res(c, "id", "nsh_widgets_root_box"), bgId = res(c, "id", "nsh_widgets_root_bg");
         // Updates reapply onto the existing views: clear the root so children are not reused or stacked.
         root.removeAllViews(rootId);
         // Keep the launcher's rounded widget corners even after the tree sets the root's colour.
-        if (Build.VERSION.SDK_INT >= 31) root.setViewOutlinePreferredRadiusDimen(rootId, android.R.dimen.system_app_widget_background_radius);
+        if (Build.VERSION.SDK_INT >= 31) root.setViewOutlinePreferredRadiusDimen(frameId, android.R.dimen.system_app_widget_background_radius);
         JSONObject snap = readJson(new File(dir(c, kind), "snapshot.json"));
         JSONObject tree = snap == null ? null : snap.optJSONObject("root");
         if (tree == null) {
@@ -322,9 +364,14 @@ public final class NshWidgets {
         JSONObject style = tree.optJSONObject("style");
         // The tree's root background and padding belong to the widget's own frame, as on iOS.
         if (style != null) {
-            JSONArray rbg = style.optJSONArray("bg");
-            if (rbg == null && style.optJSONObject("gradient") != null) rbg = style.optJSONObject("gradient").optJSONArray("from");
-            pairColor(c, root, rootId, "setBackgroundColor", rbg);
+            pairColor(c, root, frameId, "setBackgroundColor", style.optJSONArray("bg"));
+            JSONObject grad = style.optJSONObject("gradient");
+            if (grad != null) {
+                root.setImageViewBitmap(bgId, gradientBitmap(c, grad));
+                root.setViewVisibility(bgId, android.view.View.VISIBLE);
+            } else {
+                root.setViewVisibility(bgId, android.view.View.GONE);
+            }
             JSONArray pad = style.optJSONArray("pad");
             if (pad != null && pad.length() == 4) {
                 root.setViewPadding(rootId, px(c, pad.optDouble(3)), px(c, pad.optDouble(0)), px(c, pad.optDouble(1)), px(c, pad.optDouble(2)));
@@ -344,7 +391,7 @@ public final class NshWidgets {
         String url = snap.optString("url", "");
         if (!url.isEmpty()) {
             Intent open = new Intent(Intent.ACTION_VIEW, Uri.parse(url)).setPackage(pkg);
-            root.setOnClickPendingIntent(rootId, PendingIntent.getActivity(c, 1, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
+            root.setOnClickPendingIntent(frameId, PendingIntent.getActivity(c, 1, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
         }
         return root;
     }

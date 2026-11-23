@@ -1,6 +1,6 @@
 // The counter, written with kit components. No platform code here.
-import { setTheme } from "../../../packages/nsh-widgets/src/base";
-import { ActionButton, ButtonRow, Card, Gap, Header, LinkButton, Stat, kitTheme } from "../../../packages/nsh-widgets/src/kit";
+import { setTheme } from "nsh-widgets/base";
+import { ActionButton, ButtonRow, Card, Gap, Header, LinkButton, Stat, kitTheme } from "nsh-widgets/kit";
 
 export function counterWidget(platform: string) {
   setTheme(kitTheme);

@@ -1,10 +1,10 @@
 #!/bin/bash
-# Builds crates/nsh-widgets/android/nsh-widgets.aar from its Java sources and resources.
+# Builds android/nsh-widgets.aar from its Java sources and resources.
 # Needs a JDK (javac, jar) and an Android SDK platform jar. The AAR is committed; CI rebuilds it to
 # check the sources compile.
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-A=$ROOT/crates/nsh-widgets/android
+A=$ROOT/android
 SDK=${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$HOME/Library/Android/sdk}}
 PLATFORM=${NSH_WIDGETS_ANDROID_PLATFORM:-$(ls -d "$SDK"/platforms/android-* | sort -V | tail -1)}
 WORK=$(mktemp -d)

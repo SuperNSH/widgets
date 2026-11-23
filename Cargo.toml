@@ -1,5 +1,39 @@
+[package]
+name = "nsh-widgets"
+description = "Home-screen widgets for Native Shell (NSH) apps: one widget tree, drawn by SwiftUI on iOS and macOS and by RemoteViews on Android."
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/SuperNSH/widgets"
+authors = ["hmziqrs"]
+build = "build.rs"
+readme = "README.md"
+# The crate is the repo root (NSH installs an nshm from a repo's root); ship only what builds it.
+include = ["Cargo.toml", "build.rs", "src/**", "swift/**", "android/**", "nsh.json", "packages/nsh-widgets/src/**", "README.md", "LICENSE"]
+
+[lib]
+name = "nsh_widgets"
+path = "src/lib.rs"
+
+[dependencies]
+nsh-core = "0.6"
+serde_json = "1"
+thiserror = "2"
+
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.21"
+ndk-context = "0.1"
+
+[dev-dependencies]
+tempfile = "3"
+
+# The renderer, its layouts and icons, and the button receiver (declared in the AAR's own manifest).
+# The app's per-kind providers come from the AAR `nsh-widgets build` writes for the app.
+[package.metadata.nsh.android]
+libraries = ["android/nsh-widgets.aar"]
+
 [workspace]
-members = ["crates/nsh-widgets", "crates/nsh-widgets-cli"]
+members = [".", "crates/nsh-widgets-cli"]
 resolver = "3"
 
 [workspace.package]

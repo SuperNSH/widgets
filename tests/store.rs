@@ -109,3 +109,17 @@ fn the_change_token_moves_when_data_is_written() {
     store.apply("Counter", "inc:count").unwrap();
     assert_ne!(store.change_token("Counter"), first);
 }
+
+#[test]
+fn the_lock_screen_tree_is_checked_too() {
+    let (_dir, store) = temp();
+    let root = json!({ "t": "text", "text": "a" });
+    store
+        .set_ui(
+            "Steps",
+            &json!({ "v": 1, "root": root, "accessory": { "t": "text", "text": "{steps}" } }),
+        )
+        .unwrap();
+    let bad = json!({ "v": 1, "root": root, "accessory": { "t": "canvas" } });
+    assert!(store.set_ui("Steps", &bad).is_err());
+}

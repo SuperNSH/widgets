@@ -1,0 +1,34 @@
+$ nsh-widgets show Counter --simulator
+NSH WIDGETS iOS
+2
+tap +1 in the widget
+[+1] [−1] [Open]
+
+$ nsh-widgets show Live --simulator
+▶ FOCUS SESSION 00:04
+6:26:36
+Break in 0:00
+Tip: water, then work
+
+$ nsh-widgets show Tasks --simulator
+TODAY'S TASKS tap to toggle
+☑ Ship the widget spike
+☐ Review the NSH PR
+☐ Update the plan
+
+$ nsh-widgets show Dashboard --simulator
+⚡ Today 9039 steps
+Goal 10000 90%
+▓▓▓▓▓▓▓▓▓░ 90%
+▃▇█▅▄█▆
+★ 12 day streak 🔥 407 kcal
+[+1 day] [−1]
+
+$ nsh-widgets show Steps --simulator
+⚡ STEPS
+9039
+▓▓▓▓▓▓▓▓▓░ 90%
+90% of 10000
+
+$ nsh-widgets show Steps --simulator --format waybar
+{"text":"⚡ 9039 steps","tooltip":"⚡ STEPS\n9039\n▓▓▓▓▓▓▓▓▓░ 90%\n90% of 10000","class":"Steps"}

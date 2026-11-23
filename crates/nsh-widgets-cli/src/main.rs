@@ -4,6 +4,8 @@
 //! - `build`: builds the WidgetKit extension (iOS simulator, iOS devices, macOS) and the app's
 //!   Android widget library, then writes their entries into `nsh.json`.
 //! - `check`: checks `widgets.json` and that `nsh.json` carries what `build` writes.
+//! - `preview`: draws the widgets as an HTML page, light and dark, in every size.
+//! - `show`: prints one widget as text or Waybar JSON, for terminals and Linux status bars.
 //! - `doctor`: checks the tools `build` runs.
 
 use std::{
@@ -18,6 +20,8 @@ mod android;
 mod apple;
 mod config;
 mod nshjson;
+mod render;
+mod source;
 #[cfg(test)]
 mod tests;
 
@@ -29,15 +33,28 @@ usage:
   nsh-widgets init   [--app DIR] [--group GROUP]
   nsh-widgets build  [--app DIR] [--only ios|macos|android]...
   nsh-widgets check  [--app DIR]
+  nsh-widgets preview [--app DIR] [SOURCE] [--out FILE]
+  nsh-widgets show KIND [SOURCE] [--format text|waybar] [--follow]
   nsh-widgets doctor
 
-DIR holds nsh.json and widgets.json (default: the current directory).";
+DIR holds nsh.json and widgets.json (default: the current directory).
+SOURCE is where the app wrote its widgets:
+  --simulator          the booted iOS simulator's App Group container (needs --app)
+  --dir ROOT           a store root (holding nsh/widgets), such as NSH_WIDGETS_DIR
+  --group NAME         a Linux or Windows app's store, as Widgets.configure(NAME) placed it
+  --snapshot F [--data F]  one snapshot.json and data.json
+With none, show reads NSH_WIDGETS_DIR.";
 
 struct Args {
     command: String,
     app: PathBuf,
     only: Vec<String>,
     group: Option<String>,
+    source: source::Source,
+    out: Option<PathBuf>,
+    format: String,
+    follow: bool,
+    kind: Option<String>,
 }
 
 fn parse() -> anyhow::Result<Args> {
@@ -48,12 +65,25 @@ fn parse() -> anyhow::Result<Args> {
         app: PathBuf::from("."),
         only: Vec::new(),
         group: None,
+        source: source::Source::default(),
+        out: None,
+        format: "text".into(),
+        follow: false,
+        kind: None,
     };
     while let Some(a) = it.next() {
         match a.as_str() {
             "--app" => args.app = it.next().context("--app needs a directory")?.into(),
             "--only" => args.only.push(it.next().context("--only needs ios, macos or android")?),
             "--group" => args.group = Some(it.next().context("--group needs an App Group")?),
+            "--simulator" => args.source.simulator = true,
+            "--dir" => args.source.dir = Some(it.next().context("--dir needs a directory")?.into()),
+            "--snapshot" => args.source.snapshot = Some(it.next().context("--snapshot needs a file")?.into()),
+            "--data" => args.source.data = Some(it.next().context("--data needs a file")?.into()),
+            "--out" => args.out = Some(it.next().context("--out needs a file")?.into()),
+            "--format" => args.format = it.next().context("--format needs text or waybar")?,
+            "--follow" => args.follow = true,
+            other if !other.starts_with("--") && args.kind.is_none() => args.kind = Some(other.to_owned()),
             other => bail!("unknown argument {other}\n\n{USAGE}"),
         }
     }
@@ -82,6 +112,8 @@ fn run() -> anyhow::Result<()> {
         "build" => build(&args),
         "check" => check(&args.app),
         "doctor" => doctor(),
+        "preview" => source::preview(&args),
+        "show" => source::show(&args),
         "" | "help" | "--help" | "-h" => {
             println!("{USAGE}");
             Ok(())

@@ -59,7 +59,8 @@ impl WidgetError {
 static GROUP: Mutex<Option<String>> = Mutex::new(None);
 
 /// Uses `group` as the App Group on Apple platforms instead of the `NshWidgetsAppGroup` Info.plist key
-/// `nsh-widgets build` writes. Android ignores it: the widget runs in the app's own process there.
+/// `nsh-widgets build` writes. On Linux and Windows it names the store directory `nsh-widgets show`
+/// reads. Android ignores it: the widget runs in the app's own process there.
 pub fn configure(group: impl Into<String>) {
     *GROUP.lock().unwrap_or_else(|e| e.into_inner()) = Some(group.into());
 }
@@ -137,7 +138,7 @@ pub struct NativeWidgets;
 
 #[module]
 impl NativeWidgets {
-    /// Sets the App Group on Apple platforms (see [`configure`]).
+    /// Sets the App Group on Apple platforms, or the store's name on Linux and Windows (see [`configure`]).
     pub fn configure(group: String) {
         configure(group);
     }

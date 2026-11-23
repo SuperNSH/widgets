@@ -28,10 +28,11 @@ Under `<root>/nsh/widgets/`:
 | `root` | yes | The root node. |
 | `font` | no | A font family bundled through `widgets.json` `fonts`. iOS and macOS only. |
 | `url` | no | Opened when the widget itself is tapped. |
+| `accessory` | no | The tree for the iOS lock-screen families (`circular`, `rectangular`, `inline`); `root` when absent. Checked like `root`. |
 
 `set_ui` refuses a snapshot whose `v` is not 1, that has no `root`, that has a node without `t` or with an unknown `t`, or whose button action is not `open:...` and not in the action vocabulary.
 
-The root node's `bg` or `gradient` becomes the widget's container background on every platform. On Android the root's `pad` becomes the container's padding. On iOS and macOS the root keeps only `fg`, `size`, `weight`, `gap`, `align` and `grow`; its `pad` is dropped and WidgetKit's own content margins apply.
+The root node's `bg` or `gradient` becomes the widget's container background, and its `pad` the widget's padding (16 points when it has none), on every platform. iOS and macOS turn WidgetKit's own content margins off so the padding matches Android. On the lock screen the system draws the background and the padding is 0.
 
 ## Nodes
 
@@ -46,7 +47,7 @@ Every node has `t` and optional `style`. Other keys by type:
 | `spacer` | | `Spacer(cls?)` | Flexible space. |
 | `progress` | `key` | `Progress(cls, key)` | A bar filled to `data[key]`, clamped to 0..1. `fg` is the fill, `bg` the track, `height` the thickness. |
 | `bars` | `key` | `Bars(cls, key)` | A bar chart of the numbers in `data[key]`, bottom-aligned, scaled to the largest. `height` is the chart height (default 48), `gap` the spacing (default 4). |
-| `icon` | `name` | `Icon(cls, name)` | `star`, `bolt`, `check`, `play` or `flame`. Size from `height`, else `size`, else 18. |
+| `icon` | `name` | `Icon(cls, name)` | One of the shared set (`ICONS`): `star`, `bolt`, `check`, `play`, `pause`, `flame`, `plus`, `minus`, `arrow-up`, `arrow-down`, `heart`, `home`, `person`, `bell`, `clock`, `calendar`, `cloud`, `sun`, `moon`, `drop`, `music`. Size from `height`, else `size`, else 18. |
 | `timer` | `key`, `mode` | `Timer(cls, key, mode)` | Time since (`up`) or until (`down`) the epoch milliseconds in `data[key]`, ticked by the system. |
 | `clock` | | `Clock(cls)` | The current time, kept live by the system. |
 | `toggle` | `key`, `text`, `action` | `Toggle(cls, key, label)` | A switch bound to the boolean `data[key]`. The action is `toggle:<key>`. |
@@ -67,7 +68,7 @@ A renderer draws an unknown type as nothing, but `set_ui` refuses one first.
 | `radius` | number | Corner radius, capped at 200. |
 | `align` | `start`, `center`, `end` | Cross-axis alignment: horizontal in a `col`, vertical in a `row`. |
 | `grow` | boolean | A `col` fills the remaining height. |
-| `hide` | list of families | Leaves the node out of `small`, `medium` or `large` widgets. |
+| `hide` | list of families | Leaves the node out of `small`, `medium` or `large` widgets, or of the lock-screen `circular`, `rectangular` or `inline` ones. |
 | `gradient` | `{from, to, dir}` | A linear gradient background. `from` and `to` are pairs; `dir` is `b` (down), `r` (right) or `br` (diagonal). |
 | `animate` | `"number"` | Animate changes of the text's value where the platform can. |
 | `height` | number | Bar chart height, progress thickness, icon size. |
@@ -105,7 +106,7 @@ The TS primitives take a class string first. `tw()` resolves this Tailwind subse
 | `bg-gradient-to-b|r|br`, `from-<colour>`, `to-<colour>`, with `dark:` | `gradient`; needs a direction and both ends |
 | `animate-number` | `animate: "number"` |
 | `h-N` | `height`, N x 4 |
-| `small:hidden`, `medium:hidden`, `large:hidden`, `hidden` | `hide` |
+| `small:hidden`, `medium:hidden`, `large:hidden`, `circular:hidden`, `rectangular:hidden`, `inline:hidden`, `hidden` | `hide` |
 
 Colours are `white`, `black`, the palettes `slate`, `neutral`, `blue`, `emerald`, `amber`, `rose`, `violet` at shades 50 to 950, and theme tokens. Tokens carry both a light and a dark value. `defaultTheme` has `surface`, `surface-2`, `text`, `muted`, `primary`, `on-primary`; `setTheme(theme)` adds to or overrides them. `setFont(family)` sets the snapshot's `font`.
 

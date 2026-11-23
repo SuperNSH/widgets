@@ -45,6 +45,25 @@ struct UISnapshot: Decodable {
     var font: String?
     var url: String?
     var root: UINode
+    /// The tree for lock-screen families (iOS accessory widgets); `root` when absent.
+    var accessory: UINode?
+}
+
+extension WidgetFamily {
+    /// The IR's name for this family: small, medium, large, or circular, rectangular, inline on the lock screen.
+    var nshName: String {
+        switch self {
+        case .systemSmall: return "small"
+        case .systemLarge, .systemExtraLarge: return "large"
+        #if os(iOS)
+        case .accessoryCircular: return "circular"
+        case .accessoryRectangular: return "rectangular"
+        case .accessoryInline: return "inline"
+        #endif
+        default: return "medium"
+        }
+    }
+    var isAccessory: Bool { ["circular", "rectangular", "inline"].contains(nshName) }
 }
 
 let appGroup = Bundle.main.object(forInfoDictionaryKey: "NshWidgetsAppGroup") as? String ?? ""
@@ -128,7 +147,7 @@ struct NodeView: View {
     @Environment(\.widgetFamily) private var family
 
     private var familyName: String {
-        switch family { case .systemSmall: "small"; case .systemLarge, .systemExtraLarge: "large"; default: "medium" }
+        family.nshName
     }
     private var s: UIStyle { node.style ?? UIStyle() }
     private func pick(_ pair: [String]?) -> Color? {
@@ -158,7 +177,14 @@ struct NodeView: View {
     private var kids: [UINode] { node.children ?? [] }
     private func number(_ key: String?) -> Double? { key.flatMap { (data[$0] as? NSNumber)?.doubleValue } }
     private var fgColor: Color { pick(s.fg) ?? .primary }
-    private static let symbols = ["star": "star.fill", "bolt": "bolt.fill", "check": "checkmark.circle.fill", "play": "play.fill", "flame": "flame.fill"]
+    /// The shared icon set; Android draws the same names from its vector drawables.
+    private static let symbols = [
+        "star": "star.fill", "bolt": "bolt.fill", "check": "checkmark.circle.fill", "play": "play.fill", "pause": "pause.fill",
+        "flame": "flame.fill", "plus": "plus", "minus": "minus", "arrow-up": "arrow.up", "arrow-down": "arrow.down",
+        "heart": "heart.fill", "home": "house.fill", "person": "person.fill", "bell": "bell.fill", "clock": "clock.fill",
+        "calendar": "calendar", "cloud": "cloud.fill", "sun": "sun.max.fill", "moon": "moon.fill", "drop": "drop.fill",
+        "music": "music.note",
+    ]
     private func styledText(_ t: Text) -> some View {
         t.font(font.map { Font.custom($0, fixedSize: s.size ?? 14).weight(weight) } ?? .system(size: s.size ?? 14, weight: weight))
             .foregroundStyle(fgColor)
@@ -309,23 +335,32 @@ struct NshWidgetView: View {
     let entry: NshEntry
     var kind: String
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.widgetFamily) private var family
     var body: some View {
-        let root = entry.snapshot?.root
+        let accessory = family.isAccessory
+        let root = accessory ? (entry.snapshot?.accessory ?? entry.snapshot?.root) : entry.snapshot?.root
         let bg = root?.style?.bg
+        // Content margins are off (see nshUIConfiguration): the root's padding is the widget's, 16 by default, as on Android.
+        let p = accessory ? [0, 0, 0, 0] : (root?.style?.pad ?? [16, 16, 16, 16])
         Group {
             if let root {
                 // The root's own background becomes the widget container background.
                 NodeView(node: UINode(t: root.t, style: UIStyle(fg: root.style?.fg, size: root.style?.size, weight: root.style?.weight,
-                                                               gap: root.style?.gap, align: root.style?.align, grow: root.style?.grow),
+                                                               gap: root.style?.gap, align: root.style?.align, grow: root.style?.grow,
+                                                               hide: root.style?.hide),
                                       text: root.text, action: root.action, children: root.children),
                          data: entry.data, kind: kind, font: entry.snapshot?.font, date: entry.date)
             } else {
                 Text("Open the app to set up this widget").font(.caption)
             }
         }
+        .padding(EdgeInsets(top: p[0], leading: p[3], bottom: p[2], trailing: p[1]))
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .widgetURL(entry.snapshot?.url.flatMap(URL.init(string:)))
         .containerBackground(for: .widget) {
-            if let g = root?.style?.gradient {
+            if accessory {
+                Color.clear
+            } else if let g = root?.style?.gradient {
                 let (a, b): (UnitPoint, UnitPoint) = g.dir == "r" ? (.leading, .trailing) : g.dir == "br" ? (.topLeading, .bottomTrailing) : (.top, .bottom)
                 LinearGradient(colors: [g.from, g.to].map { Color(hex: scheme == .dark ? $0[1] : $0[0]) }, startPoint: a, endPoint: b)
             } else if let bg, bg.count == 2 { Color(hex: scheme == .dark ? bg[1] : bg[0]) } else { Color.clear }
@@ -339,5 +374,6 @@ func nshUIConfiguration(_ kind: String, _ name: String, _ about: String, _ famil
         .configurationDisplayName(name)
         .description(about)
         .supportedFamilies(families)
+        .contentMarginsDisabled()
 }
 

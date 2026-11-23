@@ -82,7 +82,17 @@ pub struct AndroidKind {
     pub cells: Option<[u32; 2]>,
 }
 
-pub const FAMILIES: &[&str] = &["small", "medium", "large", "extraLarge"];
+pub const FAMILIES: &[&str] = &[
+    "small",
+    "medium",
+    "large",
+    "extraLarge",
+    "circular",
+    "rectangular",
+    "inline",
+];
+/// Lock-screen (accessory) families: iOS only; macOS and Android leave them out.
+pub const LOCK_SCREEN: &[&str] = &["circular", "rectangular", "inline"];
 
 impl WidgetKind {
     /// [columns, rows] on Android: small 2x2, medium 4x2, large 4x4.
@@ -90,7 +100,8 @@ impl WidgetKind {
         if let Some(cells) = self.android.cells {
             return cells;
         }
-        match self.families.first().map(String::as_str) {
+        let home = self.families.iter().find(|f| !LOCK_SCREEN.contains(&f.as_str()));
+        match home.map(String::as_str) {
             Some("small") => [2, 2],
             Some("large" | "extraLarge") => [4, 4],
             _ => [4, 2],
@@ -148,7 +159,7 @@ impl Config {
             for f in &w.families {
                 if !FAMILIES.contains(&f.as_str()) {
                     out.push(format!(
-                        "kind \"{}\": unknown family \"{f}\" (small, medium, large, extraLarge)",
+                        "kind \"{}\": unknown family \"{f}\" (small, medium, large, extraLarge, circular, rectangular, inline)",
                         w.kind
                     ));
                 }

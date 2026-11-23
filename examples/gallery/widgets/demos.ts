@@ -1,6 +1,6 @@
 // Capability demos: three widgets written once, drawn natively on iOS and Android. No platform code here.
-import { Bars, Clock, Col, Icon, Progress, Rotate, Row, Spacer, Text, Timer, Toggle } from "../../../packages/nsh-widgets/src/base";
-import { ActionButton, ButtonRow, Card, Header } from "../../../packages/nsh-widgets/src/kit";
+import { Bars, Clock, Col, ICONS, Icon, type IconName, Progress, Rotate, Row, Spacer, Text, Timer, Toggle } from "nsh-widgets/base";
+import { ActionButton, ButtonRow, Card, Header } from "nsh-widgets/kit";
 
 /** Progress, a bar chart, icons, a gradient banner, an animated number and a widget-side button. */
 export const dashboardWidget = () =>
@@ -53,3 +53,29 @@ export const tasksWidget = () =>
     Toggle("text-sm text-text text-primary", "t3", "Update the plan"),
     Spacer(),
   );
+
+/** A gradient card on the home screen, and a smaller tree for the iOS lock screen. */
+export const stepsWidget = () =>
+  Col(
+    "bg-gradient-to-br from-emerald-500 to-blue-600 dark:from-emerald-700 dark:to-blue-800 p-4 gap-1 grow",
+    Row("gap-1 items-center", Icon("text-white h-4", "bolt"), Text("text-xs font-semibold text-white", "STEPS")),
+    Spacer(),
+    Text("text-3xl font-bold text-white animate-number", "{steps}"),
+    Progress("text-white bg-emerald-900 h-1.5", "progress"),
+    Text("text-xs text-emerald-50", "{percent}% of {goal}"),
+  );
+
+export const stepsAccessory = () =>
+  Row("gap-1 items-center", Icon("h-3", "bolt"), Text("text-sm font-semibold", "{steps}"), Text("text-xs circular:hidden", "steps"));
+
+/** Every icon of the shared set, on a gradient. */
+export const iconsWidget = () => {
+  const row = (names: IconName[]) => Row("gap-3 items-center", ...names.map((n) => Icon("text-white h-5", n)));
+  return Col(
+    "bg-gradient-to-r from-violet-600 to-rose-500 dark:from-violet-800 dark:to-rose-700 p-4 gap-3 grow",
+    Text("text-xs font-semibold text-white", "SHARED ICONS"),
+    row(ICONS.slice(0, 7) as IconName[]),
+    row(ICONS.slice(7, 14) as IconName[]),
+    row(ICONS.slice(14) as IconName[]),
+  );
+};

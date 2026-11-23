@@ -20,7 +20,7 @@ export type Style = {
   radius?: number;
   align?: "start" | "center" | "end";
   grow?: boolean;
-  hide?: string[]; // families this node is left out of: "small", "medium", "large"
+  hide?: string[]; // families this node is left out of: "small", "medium", "large", and on the iOS lock screen "circular", "rectangular", "inline"
   gradient?: { from: Pair; to: Pair; dir: "b" | "r" | "br" }; // falls back to `from` where a platform has no gradients
   animate?: "number"; // animate value changes where the platform can (iOS numeric transition)
   height?: number; // points: bar chart height, progress thickness, icon size
@@ -109,7 +109,7 @@ export function tw(classes: string, theme: Theme = current, unknown: string[] = 
   const pad = [0, 0, 0, 0] as [number, number, number, number];
   let padded = false;
   for (const raw of classes.split(/\s+/).filter(Boolean)) {
-    const fam = /^(small|medium|large):hidden$/.exec(raw);
+    const fam = /^(small|medium|large|circular|rectangular|inline):hidden$/.exec(raw);
     if (fam || raw === "hidden") {
       (s.hide ??= []).push(...(fam ? [fam[1]] : ["small", "medium", "large"]));
       continue;
@@ -168,8 +168,14 @@ export function Button(cls: string, action: string, label: string): Node {
 export const Progress = (cls: string, key: string): Node => ({ t: "progress", style: tw(cls), key });
 /** A bar chart of the numbers in data[key], bottom-aligned, scaled to the largest. `h-*` is the chart height. */
 export const Bars = (cls: string, key: string): Node => ({ t: "bars", style: tw(cls), key });
-/** An icon from the shared set: star, bolt, check, play, flame (SF Symbols on Apple, bundled vectors on Android). */
-export const Icon = (cls: string, name: "star" | "bolt" | "check" | "play" | "flame"): Node => ({ t: "icon", style: tw(cls), name });
+/** The shared icon set: SF Symbols on Apple, bundled vector drawables on Android. */
+export const ICONS = [
+  "star", "bolt", "check", "play", "pause", "flame", "plus", "minus", "arrow-up", "arrow-down", "heart",
+  "home", "person", "bell", "clock", "calendar", "cloud", "sun", "moon", "drop", "music",
+] as const;
+export type IconName = (typeof ICONS)[number];
+/** An icon from the shared set. `text-*` colours it, `h-*` sizes it. */
+export const Icon = (cls: string, name: IconName): Node => ({ t: "icon", style: tw(cls), name });
 /** Text the system ticks every second: time since data[key] ("up") or until it ("down"), an epoch in ms. */
 export const Timer = (cls: string, key: string, mode: "up" | "down" = "up"): Node => ({ t: "timer", style: tw(cls), key, mode });
 /** The current time, kept live by the system. */
@@ -183,12 +189,19 @@ export const Rotate = (cls: string, interval: number, ...children: Child[]): Nod
 export const Link = (cls: string, url: string, label: string): Node => ({ t: "button", style: tw(cls), action: `open:${url}`, text: label });
 
 /** Widget Tree IR v1, the content of snapshot.json. */
-export type Snapshot = { v: 1; font?: string; url?: string; root: Node };
+export type Snapshot = { v: 1; font?: string; url?: string; root: Node; accessory?: Node };
+export type SnapshotOptions = {
+  /** Opened when the widget itself is tapped (the app's URL scheme or a universal link). */
+  url?: string;
+  /** A smaller tree for the iOS lock screen (circular, rectangular, inline); `root` when absent. */
+  accessory?: Node;
+};
 
-/** The snapshot of `root`: the font set with `setFont`, and `url`, opened when the widget itself is tapped. */
-export function snapshot(root: Node, options: { url?: string } = {}): Snapshot {
+/** The snapshot of `root`, with the font set by `setFont`. */
+export function snapshot(root: Node, options: SnapshotOptions = {}): Snapshot {
   const out: Snapshot = { v: 1, root };
   if (font) out.font = font;
   if (options.url) out.url = options.url;
+  if (options.accessory) out.accessory = options.accessory;
   return out;
 }

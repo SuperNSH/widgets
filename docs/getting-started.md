@@ -2,23 +2,31 @@
 
 This adds a home-screen widget to an NSH TSX app. The steps match [`examples/gallery`](../examples/gallery), which is the working reference.
 
-Before you start, check [Requirements](../README.md#requirements): the NSH 0.6.0 release cannot package widgets; you need NSH main at or after `5aa56b19`.
+Before you start, check [Requirements](../README.md#requirements): the NSH 0.6.0 and 0.6.1 releases cannot package widgets; you need NSH main at or after `5aa56b19`, or the nightly.
 
-## 1. Add the crate
+## 1. Add the library
 
-In the app's `nsh.json`:
+In the app's directory:
+
+```sh
+nsh add github:SuperNSH/widgets@^0.1
+```
+
+`nsh.json` then lists it, and `nsh.lock` pins the version:
 
 ```json
 "dependencies": {
-  "nsh-widgets": { "path": "../widgets/crates/nsh-widgets" }
+  "nsh-widgets": { "github": "SuperNSH/widgets", "version": "^0.1" }
 }
 ```
 
-The path points at `crates/nsh-widgets` in a checkout of this repo. NSH also reads `"git"` and `"github"` dependencies, but it installs the repository root as the nshm, and this repository's root is a Cargo workspace, not the crate. A git dependency on this repo is untested; use a path until the crate is published.
+To work on the library itself, point at a checkout instead: `{ "path": "../widgets" }` (the gallery uses `"../.."`).
 
-The crate brings the TSX module `nsh-widgets/native`, the Swift bridge for Apple targets, and the Android AAR (renderer, layouts, icons, provider slots, action receiver) through its `package.metadata.nsh.android.libraries`.
+The repository root is the nshm. It brings the TSX modules `nsh-widgets`, `nsh-widgets/base` and `nsh-widgets/kit` (its `nsh.json` `exports`), the native module they call (`nsh-widgets/native`), the Swift bridge for Apple targets, and the Android AAR (renderer, layouts, icons, provider slots, action receiver).
 
 ## 2. Install the CLI
+
+Download `nsh-widgets` for your machine from the [releases](https://github.com/SuperNSH/widgets/releases), or build it:
 
 ```sh
 cargo install --git https://github.com/SuperNSH/widgets nsh-widgets-cli
@@ -60,8 +68,8 @@ Fields (from [`config.rs`](../crates/nsh-widgets-cli/src/config.rs); unknown fie
 | `widgets[].kind` | yes | A letter, then letters, digits, `_` or `-`; at most 64 characters; unique. It names the store directory, the WidgetKit kind and the Android slot. |
 | `widgets[].name` | yes | The name in the widget gallery or picker. |
 | `widgets[].description` | no | The gallery description. Android falls back to `name`. |
-| `widgets[].families` | no | `small`, `medium`, `large`, `extraLarge` (iPad and Mac). Default `["small", "medium"]`. |
-| `widgets[].android.cells` | no | `[columns, rows]`, 1 to 5 each. Default from the first family: small 2x2, medium 4x2, large 4x4. |
+| `widgets[].families` | no | `small`, `medium`, `large`, `extraLarge` (iPad and Mac), and for the iOS lock screen `circular`, `rectangular`, `inline`. Default `["small", "medium"]`. macOS and Android leave the lock-screen ones out. |
+| `widgets[].android.cells` | no | `[columns, rows]`, 1 to 5 each. Default from the first home-screen family: small 2x2, medium 4x2, large 4x4. |
 
 `widgets.json` sits beside `nsh.json` instead of inside it because NSH warns about keys it does not know.
 
@@ -71,8 +79,8 @@ A widget is a function that returns a tree. The gallery's counter, [`widgets/cou
 
 ```ts
 // The counter, written with kit components. No platform code here.
-import { setTheme } from "../../../packages/nsh-widgets/src/base";
-import { ActionButton, ButtonRow, Card, Gap, Header, LinkButton, Stat, kitTheme } from "../../../packages/nsh-widgets/src/kit";
+import { setTheme } from "nsh-widgets/base";
+import { ActionButton, ButtonRow, Card, Gap, Header, LinkButton, Stat, kitTheme } from "nsh-widgets/kit";
 
 export function counterWidget(platform: string) {
   setTheme(kitTheme);
@@ -89,7 +97,13 @@ export function counterWidget(platform: string) {
 }
 ```
 
-The TS package is not published yet, so the gallery imports it by relative path from `packages/nsh-widgets/src`. Do the same from your app, or copy the three files in.
+For the iOS lock screen, pass a smaller tree as `accessory` (the gallery's Steps widget):
+
+```ts
+Widgets.setUi("Steps", stepsWidget(), {
+  accessory: Row("gap-1 items-center", Icon("h-3", "bolt"), Text("text-sm font-semibold", "{steps}"), Text("text-xs circular:hidden", "steps")),
+});
+```
 
 `{count}` and `{label}` are filled from the kind's data when the widget draws. `inc:count` runs in the widget process, so the button works with the app closed. [ir.md](ir.md) lists every primitive, class and action; [capabilities.md](capabilities.md) says how each one looks on each platform.
 
@@ -98,7 +112,7 @@ The TS package is not published yet, so the gallery imports it by relative path 
 From the gallery's [`App.tsx`](../examples/gallery/App.tsx):
 
 ```ts
-import { Widgets } from "../../packages/nsh-widgets/src";
+import { Widgets } from "nsh-widgets";
 
 function publish() {
   Widgets.setUi("Counter", counterWidget(here), { url: "nshwidgets://widget/Counter" });
@@ -136,14 +150,14 @@ The calls:
 
 | Call | Does |
 |---|---|
-| `Widgets.setUi(kind, root, { url? })` | Writes the kind's snapshot and redraws. `url` opens when the widget itself is tapped. |
+| `Widgets.setUi(kind, root, { url?, accessory? })` | Writes the kind's snapshot and redraws. `url` opens when the widget itself is tapped; `accessory` is the iOS lock-screen tree. |
 | `Widgets.setData(kind, data)` | Replaces the data (a JSON object) and redraws. |
 | `Widgets.update(kind, patch)` | Merges top-level keys into the data, keeps keys the widget changed that the patch does not name, redraws, returns the data. |
 | `Widgets.data(kind)` | The data as the widget last left it, `{}` before anything wrote it. |
 | `Widgets.takeActions()` | Button presses since the last call, oldest first, each returned once: `{ id, kind, action, at }`. |
 | `Widgets.reload(kind)` | Redraws placed widgets of the kind. |
 | `Widgets.onChange(kind, listener)` | Calls `listener` with the data each time a widget button changes it. Returns a stop function. Stops by itself where there is no widget host. |
-| `Widgets.configure(group)` | Uses another App Group on iOS and macOS. Android ignores it. |
+| `Widgets.configure(group)` | Uses another App Group on iOS and macOS. On Linux and Windows it names the store `nsh-widgets show --group` reads. Android ignores it. |
 
 Calls throw `WidgetError` with a stable `code`: `invalid_kind`, `invalid_action`, `invalid_json`, `no_app_group`, `no_group_configured`, `io`, `unsupported`.
 
@@ -171,8 +185,44 @@ Run `build` again after editing `widgets.json`. Changing the widget tree or data
 
 `.nsh-widgets/` is build output; keep it out of version control.
 
+## 7. Check a layout without a device
+
+```sh
+nsh-widgets preview --simulator                      # what the app last published in the booted iOS simulator
+nsh-widgets preview --snapshot s.json --data d.json  # one snapshot, anywhere
+nsh-widgets show Counter --simulator                 # as text
+```
+
+`preview` writes `.nsh-widgets/preview.html`: every kind in each of its sizes, light and dark, drawn from the IR with the app's data ([example](evidence/preview/gallery-preview.png)). The native renderers stay the reference; Android's differences are in [capabilities.md](capabilities.md).
+
+## Linux and Windows
+
+No system widget host draws these widgets there. The app keeps a store anyway once it names it:
+
+```ts
+if (platform() === "linux") Widgets.configure("dev.example.app");
+```
+
+It lives in `$XDG_DATA_HOME/nsh-widgets/<name>` (or `~/.local/share/...`; `%LOCALAPPDATA%` on Windows), or in `NSH_WIDGETS_DIR` when that is set. `nsh-widgets show` prints it:
+
+```sh
+nsh-widgets show Steps --group dev.example.app --follow                  # redraws once a second in a terminal
+nsh-widgets show Steps --group dev.example.app --follow --format waybar  # one JSON object per change
+```
+
+In Waybar's config:
+
+```json
+"custom/steps": {
+  "exec": "nsh-widgets show Steps --group dev.example.app --follow --format waybar",
+  "return-type": "json"
+}
+```
+
+With `--format waybar` the bar text comes from the `accessory` tree (the lock-screen tree), and the tooltip holds the full widget.
+
 ## Platform notes
 
 - **iOS simulator**: if the widget gallery still shows old kinds, restart the simulator. The simulator sometimes redraws one press late.
 - **Android**: force-stopping the app greys out its widgets until the app is opened again.
-- **macOS**: needs a real signing identity (a free Personal Team works) and a team-prefixed App Group in `macosAppGroup`. Run the app from a place LaunchServices indexes, such as `~/Applications`, or App Intents fail with "There is no metadata". New kinds need a `build` bump in `nsh.json` (the extension's `CFBundleVersion`). The macOS path is unverified with this library build; see [status.md](status.md).
+- **macOS**: needs a real signing identity (a free Personal Team works) and a team-prefixed App Group in `macosAppGroup`. Run the app from a place LaunchServices indexes, such as `~/Applications`, or App Intents fail with "There is no metadata". New kinds need a `build` bump in `nsh.json` (the extension's `CFBundleVersion`).

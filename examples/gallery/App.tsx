@@ -1,8 +1,8 @@
 import { effect, lifecycle, mount, signal, Text, UrlScheme, View } from "nsh";
 import { platform } from "os";
-import { Widgets } from "../../packages/nsh-widgets/src";
+import { Widgets } from "nsh-widgets";
 import { counterWidget } from "./widgets/counter";
-import { dashboardWidget, liveWidget, tasksWidget } from "./widgets/demos";
+import { dashboardWidget, iconsWidget, liveWidget, stepsAccessory, stepsWidget, tasksWidget } from "./widgets/demos";
 
 const NAMES: Record<string, string> = { macos: "macOS", ios: "iOS", android: "Android" };
 const here = NAMES[platform()] ?? platform();
@@ -20,6 +20,7 @@ function randomDashboard() {
     streak: typeof old.streak === "number" ? old.streak : 12,
     kcal: Math.round(steps * 0.045),
   });
+  Widgets.update("Steps", { steps, goal, percent: Math.round((steps / goal) * 100), progress: Math.min(steps / goal, 1) });
 }
 
 function restartFocus() {
@@ -33,8 +34,10 @@ function publish() {
   Widgets.setUi("Dashboard", dashboardWidget());
   Widgets.setUi("Live", liveWidget());
   Widgets.setUi("Tasks", tasksWidget());
+  Widgets.setUi("Steps", stepsWidget(), { accessory: stepsAccessory() });
+  Widgets.setUi("Icons", iconsWidget());
   if (Widgets.data("Counter").count === undefined) Widgets.update("Counter", { count: 0, label: "tap +1 in the widget" });
-  if (Widgets.data("Dashboard").steps === undefined) randomDashboard();
+  if (Widgets.data("Dashboard").steps === undefined || Widgets.data("Steps").steps === undefined) randomDashboard();
   if (Widgets.data("Live").focusStart === undefined) restartFocus();
   if (Widgets.data("Tasks").t1 === undefined) Widgets.update("Tasks", { t1: true, t2: false, t3: false });
 }

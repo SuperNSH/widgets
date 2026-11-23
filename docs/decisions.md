@@ -20,4 +20,15 @@ Each entry says what was chosen and why.
 
 9. **Build the extension without an Xcode project.** `nsh-widgets build` runs `swiftc -application-extension` with `-Xlinker -e -Xlinker _NSExtensionMain` (without that entry point the extension crashes in Apple's extension bootstrap), then `xcrun appintentsmetadataprocessor` for the App Intents metadata (without it a widget button fails with "There is no metadata"). The renderer and a generated `WidgetBundle` are the only sources. No `.xcodeproj` to generate, check in or keep in sync.
 
-10. **Require NSH main after longbridge/nsh#2879.** Embedding an app extension needs `ios.extensions` and `macos.extensions` in `nsh.json`, merged on 2026-11-23, and Android needs `android.libraries` with AAR manifest merging. The NSH 0.6.0 release has neither, so the library targets NSH main at or after `5aa56b19` until a release ships them.
+10. **Require NSH main after longbridge/nsh#2879.** Embedding an app extension needs `ios.extensions` and `macos.extensions` in `nsh.json`, merged on 2026-11-23, and Android needs `android.libraries` with AAR manifest merging. The NSH 0.6.0 release has neither, so the library targets NSH main at or after `5aa56b19` (or the nightly) until a release ships them.
+
+11. **The repository root is the nshm.** NSH installs a git nshm from the repository's root and has no way to name a subdirectory. So the crate lives at the root (with the CLI as a second workspace member), and the root `nsh.json` exports the TypeScript in `packages/nsh-widgets/src` as `nsh-widgets`, `nsh-widgets/base` and `nsh-widgets/kit`. An app adds one dependency and gets the Rust module, the AAR and the TSX modules together; NSH versions come from the repo's tags. The crate's `include` list keeps the published crate to what builds it.
+
+12. **Android gradients as bitmaps.** RemoteViews can set a view's colour but no gradient drawable. A container with a gradient is wrapped in a `FrameLayout` whose `ImageView` stretches a small bitmap drawn with `LinearGradient`; the root has such an `ImageView` behind its content. The bitmap is drawn for the current light or dark mode, so a mode change shows at the next redraw. Non-container nodes keep the first-colour fallback.
+
+13. **WidgetKit content margins off.** WidgetKit adds its own margins that Android has no equivalent of, and earlier builds dropped the root's padding on iOS. The widget configuration calls `contentMarginsDisabled()` and the renderer applies the root's `pad` (16 by default), so a tree is padded the same everywhere.
+
+14. **Lock-screen widgets take their own tree.** A home-screen tree does not fit a 76-point circle. The snapshot carries an optional `accessory` tree for `circular`, `rectangular` and `inline`, and `circular:hidden` style classes trim it further. The same tree is the bar text of `show --format waybar`.
+
+15. **`preview` and `show` draw in the CLI, not in a fourth native renderer.** They exist to check a layout and its data without a device, and to put a widget in a terminal or Waybar where no widget host exists. They follow the native renderers' rules but are not the reference.
+

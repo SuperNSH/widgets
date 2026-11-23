@@ -2,7 +2,7 @@
 // Widgets.setUi, and feed it data. The renderers in the widget extension (iOS, macOS) and the Android
 // provider draw it natively; widget buttons change the data without the app.
 import { NativeWidgets } from "nsh-widgets/native";
-import { snapshot, type Node } from "./base";
+import { snapshot, type Node, type SnapshotOptions } from "./base";
 
 export * from "./base";
 
@@ -41,8 +41,8 @@ export const Widgets = {
   configure(group: string): void {
     NativeWidgets.configure(group);
   },
-  /** Publishes `kind`'s UI tree and redraws it. `url` opens when the widget itself is tapped. */
-  setUi(kind: string, root: Node, options: { url?: string } = {}): void {
+  /** Publishes `kind`'s UI tree and redraws it. `url` opens when the widget is tapped; `accessory` is the lock-screen tree. */
+  setUi(kind: string, root: Node, options: SnapshotOptions = {}): void {
     call(() => NativeWidgets.setUi(kind, JSON.stringify(snapshot(root, options))));
   },
   /** Replaces `kind`'s data and redraws it. */
@@ -65,7 +65,7 @@ export const Widgets = {
   reload(kind: string): void {
     call(() => NativeWidgets.reload(kind));
   },
-  /** Calls `listener` with `kind`'s data each time a widget button changes it. Returns a stop function. */
+  /** Calls `listener` with `kind`'s data each time a widget button changes it. Returns a stop function. Where there is no store, it never calls. */
   onChange(kind: string, listener: (data: WidgetData) => void): () => void {
     let stopped = false;
     (async () => {
@@ -74,8 +74,9 @@ export const Widgets = {
         try {
           data = JSON.parse(await NativeWidgets.nextChange(kind)) as WidgetData;
         } catch (e) {
-          // No widget host here (desktop, web): stop listening rather than spin.
-          if (asError(e).code === "unsupported") return;
+          // No store here (web, or a desktop app that never called configure): stop rather than spin.
+          const code = asError(e).code;
+          if (code === "unsupported" || code === "no_group_configured") return;
           throw asError(e);
         }
         if (!stopped) listener(data);

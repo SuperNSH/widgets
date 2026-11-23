@@ -2,13 +2,13 @@
   "id": "dev.supernsh.widgets.gallery",
   "name": "Widget Gallery",
   "version": "0.1.0",
-  "build": 1,
+  "build": 2,
   "schemes": [
     "nshwidgets"
   ],
   "dependencies": {
     "nsh-widgets": {
-      "path": "../../crates/nsh-widgets"
+      "path": "../.."
     }
   },
   "ios": {

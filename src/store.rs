@@ -229,6 +229,9 @@ pub fn check_snapshot(snapshot: &Value) -> Result<(), WidgetError> {
     }
     let root = snapshot.get("root").ok_or_else(|| invalid("no \"root\" node".into()))?;
     let mut stack = vec![("root".to_owned(), root)];
+    if let Some(accessory) = snapshot.get("accessory") {
+        stack.push(("accessory".to_owned(), accessory));
+    }
     while let Some((at, node)) = stack.pop() {
         let t = node
             .get("t")

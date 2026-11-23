@@ -1,5 +1,5 @@
 import { expect, test } from "nsh/test";
-import { Bars, Button, Col, Icon, Link, Progress, Rotate, Row, Spacer, Text, Timer, Toggle, setFont, setTheme, snapshot, tw, defaultTheme } from "../src/base";
+import { Bars, Button, Col, ICONS, Icon, Link, Progress, Rotate, Row, Spacer, Text, Timer, Toggle, setFont, setTheme, snapshot, tw, defaultTheme } from "../src/base";
 
 test("resolves sizes, weights, spacing and radius", () => {
   const unknown: string[] = [];
@@ -73,4 +73,15 @@ test("snapshots carry the IR version, the font and the widget url", () => {
   setFont("Onest");
   expect(snapshot(Text("", "hi"), { url: "app://home" })).toEqual({ v: 1, font: "Onest", url: "app://home", root: { t: "text", style: {}, text: "hi" } });
   setFont(undefined);
+});
+
+test("the lock-screen tree and its hide classes", () => {
+  const tree = Text("rectangular:hidden", "{steps}");
+  expect(tree.style?.hide).toEqual(["rectangular"]);
+  expect(snapshot(Text("", "a"), { accessory: tree }).accessory).toEqual(tree);
+});
+
+test("every shared icon name builds", () => {
+  expect(ICONS.length).toBe(21);
+  expect(ICONS.map((n) => Icon("", n).name)).toEqual([...ICONS]);
 });

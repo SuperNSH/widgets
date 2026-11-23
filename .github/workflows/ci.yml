@@ -77,8 +77,9 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      # Rebuilds the committed AAR from its sources: the Java must compile against the SDK.
-      - run: scripts/build-aar.sh
+      # Rebuilds the AAR from its sources (the Java must compile against the SDK) and checks the
+      # committed one matches them.
+      - run: scripts/check-aar.sh
 
   apple-extension:
     runs-on: macos-latest
@@ -92,6 +93,7 @@ jobs:
       - run: cargo run -p nsh-widgets-cli -- build --app examples/gallery
       - run: cargo run -p nsh-widgets-cli -- check --app examples/gallery
       - run: test -d examples/gallery/.nsh-widgets/iphonesimulator/NshWidgets.appex/Metadata.appintents
+      - run: test -d examples/gallery/.nsh-widgets/macosx/NshWidgets.appex/Contents/Resources/Metadata.appintents
 
   typescript:
     runs-on: ubuntu-latest
@@ -112,3 +114,21 @@ jobs:
           nsh build 2>&1 | tee build.log
           ! grep -i warn build.log
           nsh test
+
+  # The gallery imports the library by name (the repo root is an nshm with TSX exports), which needs
+  # NSH main: the nightly.
+  gallery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install NSH nightly
+        env:
+          NSH_VERSION: nightly
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/SuperNSH/nsh-builds/master/install.sh | sh
+          echo "$HOME/.nsh/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Type-check the gallery
+        working-directory: examples/gallery
+        run: nsh check
