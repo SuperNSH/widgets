@@ -154,6 +154,46 @@ public final class NshWidgets {
         return layer;
     }
 
+    /** Runs one action of the vocabulary (inc:key, dec:key, toggle:key) on `kind`'s data and queues its event. */
+    static void apply(Context c, String kind, String action) {
+        String[] p = action.split(":", 2);
+        if (p.length != 2) return;
+        try {
+            JSONObject d = data(c, kind);
+            switch (p[0]) {
+                case "inc": d.put(p[1], d.optLong(p[1], 0) + 1); break;
+                case "dec": d.put(p[1], d.optLong(p[1], 0) - 1); break;
+                case "toggle": d.put(p[1], !d.optBoolean(p[1], false)); break;
+                default: return;
+            }
+            writeData(c, kind, d, action);
+        } catch (Exception e) {
+            android.util.Log.e("nsh-widgets", "action failed", e);
+        }
+    }
+
+    /** The scrolling list views() attaches to the root (API 31+), set while a widget's tree is built. */
+    static final ThreadLocal<Object> PENDING_LIST = new ThreadLocal<>();
+
+    /** A list item's data: the widget's data with the item's fields as item.field. */
+    static JSONObject itemData(JSONObject data, JSONObject item) {
+        JSONObject out = new JSONObject();
+        try {
+            for (Iterator<String> it = data.keys(); it.hasNext(); ) {
+                String k = it.next();
+                out.put(k, data.opt(k));
+            }
+            if (item != null) {
+                for (Iterator<String> it = item.keys(); it.hasNext(); ) {
+                    String k = it.next();
+                    out.put("item." + k, item.opt(k));
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return out;
+    }
+
     static RemoteViews gap(Context c, double size) {
         RemoteViews g = new RemoteViews(c.getPackageName(), res(c, "layout", "nsh_widgets_gap"));
         int p = px(c, size);
@@ -331,6 +371,40 @@ public final class NshWidgets {
                 v.setOnClickPendingIntent(id, action(c, kind, node.optString("action"), req));
                 return v;
             }
+            case "list": {
+                JSONArray items = data.optJSONArray(node.optString("key"));
+                JSONArray tpl = node.optJSONArray("children");
+                JSONObject item = tpl == null ? null : tpl.optJSONObject(0);
+                int n = items == null || item == null ? 0 : items.length();
+                double gap = style == null ? 0 : style.optDouble("gap", 0);
+                if (Build.VERSION.SDK_INT >= 31 && PENDING_LIST.get() == null) {
+                    // A real, scrolling list. Android takes its adapter only on the widget's root views, so
+                    // views() attaches these items there; a widget gets one such list, later ones are static.
+                    RemoteViews v = new RemoteViews(pkg, res(c, "layout", "nsh_widgets_list"));
+                    int id = res(c, "id", "nsh_widgets_list");
+                    RemoteViews.RemoteCollectionItems.Builder b = new RemoteViews.RemoteCollectionItems.Builder();
+                    for (int i = 0; i < n; i++) {
+                        RemoteViews row = new RemoteViews(pkg, res(c, "layout", "nsh_widgets_col"));
+                        int box = res(c, "id", "nsh_widgets_box");
+                        // The list recycles rows by reapplying these actions: clear first, or rows keep old children.
+                        row.removeAllViews(box);
+                        row.addView(box, build(c, item, itemData(data, items.optJSONObject(i)), kind, false, req, family));
+                        if (gap > 0) row.addView(box, gap(c, gap));
+                        b.addItem(i, row);
+                    }
+                    PENDING_LIST.set(b.setHasStableIds(true).setViewTypeCount(1).build());
+                    if (style != null && style.has("height")) v.setViewLayoutHeight(id, (float) style.optDouble("height"), TypedValue.COMPLEX_UNIT_DIP);
+                    return v;
+                }
+                // Older Android: the first `max` items, as on iOS.
+                RemoteViews v = new RemoteViews(pkg, res(c, "layout", "nsh_widgets_col"));
+                int box = res(c, "id", "nsh_widgets_box");
+                for (int i = 0; i < Math.min(n, node.optInt("max", 8)); i++) {
+                    if (i > 0 && gap > 0) v.addView(box, gap(c, gap));
+                    v.addView(box, build(c, item, itemData(data, items.optJSONObject(i)), kind, false, req, family));
+                }
+                return v;
+            }
             case "rotate": {
                 // ViewFlipper is one of the few views RemoteViews may animate: it slides between children on its own.
                 RemoteViews v = new RemoteViews(pkg, res(c, "layout", "nsh_widgets_rotate"));
@@ -345,7 +419,7 @@ public final class NshWidgets {
         }
     }
 
-    static RemoteViews views(Context c, String kind, String family) {
+    static RemoteViews views(Context c, String kind, String family, String option) {
         String pkg = c.getPackageName();
         RemoteViews root = new RemoteViews(pkg, res(c, "layout", "nsh_widgets_root"));
         int frameId = android.R.id.background, rootId = res(c, "id", "nsh_widgets_root_box"), bgId = res(c, "id", "nsh_widgets_root_bg");
@@ -387,7 +461,27 @@ public final class NshWidgets {
             } catch (Exception ignored) {
             }
         }
-        root.addView(rootId, build(c, tree, data(c, kind), kind, false, new int[] {100}, family));
+        JSONObject data = data(c, kind);
+        if (option != null) {
+            // The chosen option's object lies over the kind's data, and {option} names the choice.
+            JSONObject over = data.optJSONObject(option);
+            data = itemData(data, null);
+            try {
+                if (over != null) for (Iterator<String> it = over.keys(); it.hasNext(); ) {
+                    String k = it.next();
+                    data.put(k, over.opt(k));
+                }
+                data.put("option", option);
+            } catch (Exception ignored) {
+            }
+        }
+        PENDING_LIST.remove();
+        root.addView(rootId, build(c, tree, data, kind, false, new int[] {100}, family));
+        Object list = PENDING_LIST.get();
+        PENDING_LIST.remove();
+        if (list != null && Build.VERSION.SDK_INT >= 31) {
+            root.setRemoteAdapter(res(c, "id", "nsh_widgets_list"), (RemoteViews.RemoteCollectionItems) list);
+        }
         String url = snap.optString("url", "");
         if (!url.isEmpty()) {
             Intent open = new Intent(Intent.ACTION_VIEW, Uri.parse(url)).setPackage(pkg);
@@ -412,9 +506,47 @@ public final class NshWidgets {
         }
     }
 
+    static android.os.Bundle meta(Context c, ComponentName provider) {
+        try {
+            android.os.Bundle b = c.getPackageManager().getReceiverInfo(provider, android.content.pm.PackageManager.GET_META_DATA).metaData;
+            return b == null ? new android.os.Bundle() : b;
+        } catch (Exception e) {
+            return new android.os.Bundle();
+        }
+    }
+
+    /** A slot's option values (widgets.json "options"), joined with | in its meta-data; empty when it has none. */
+    static String[] optionsOf(Context c, ComponentName provider) {
+        String v = meta(c, provider).getString("dev.supernsh.widgets.options");
+        return v == null || v.isEmpty() ? new String[0] : v.split("\\|");
+    }
+
+    static String optionsTitleOf(Context c, ComponentName provider) {
+        String t = meta(c, provider).getString("dev.supernsh.widgets.options_title");
+        return t == null ? "" : t;
+    }
+
+    static android.content.SharedPreferences prefs(Context c) {
+        return c.getSharedPreferences("nsh_widgets", Context.MODE_PRIVATE);
+    }
+
+    static void setOption(Context c, int id, String value) {
+        prefs(c).edit().putString("option_" + id, value).apply();
+    }
+
+    /** The placed widget's chosen option, the first value until the user picks one; null without options. */
+    static String optionFor(Context c, int id, String[] values) {
+        if (values.length == 0) return null;
+        String v = prefs(c).getString("option_" + id, null);
+        return v == null || !java.util.Arrays.asList(values).contains(v) ? values[0] : v;
+    }
+
     /** Redraws one placed widget. */
     static void draw(Context c, AppWidgetManager m, int id, String kind) {
-        if (kind != null) m.updateAppWidget(id, views(c, kind, family(m, id)));
+        if (kind == null) return;
+        android.appwidget.AppWidgetProviderInfo info = m.getAppWidgetInfo(id);
+        String option = info == null ? null : optionFor(c, id, optionsOf(c, info.provider));
+        m.updateAppWidget(id, views(c, kind, family(m, id), option));
     }
 
     /** Redraws every placed widget of `kind` (every kind when null). Called by the app's Rust through JNI. */

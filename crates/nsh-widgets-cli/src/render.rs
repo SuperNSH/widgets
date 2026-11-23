@@ -67,6 +67,59 @@ fn number(node: &Value, data: &Map<String, Value>) -> Option<f64> {
         .and_then(Value::as_f64)
 }
 
+/// The shared icon set, as the renderers draw it.
+pub const ICONS: &[&str] = &[
+    "star",
+    "bolt",
+    "check",
+    "play",
+    "pause",
+    "flame",
+    "plus",
+    "minus",
+    "arrow-up",
+    "arrow-down",
+    "heart",
+    "home",
+    "person",
+    "bell",
+    "clock",
+    "calendar",
+    "cloud",
+    "sun",
+    "moon",
+    "drop",
+    "music",
+];
+
+/// The SF Symbol each shared icon draws as on Apple platforms.
+pub fn sf_symbol(name: &str) -> &'static str {
+    match name {
+        "star" => "star.fill",
+        "bolt" => "bolt.fill",
+        "check" => "checkmark.circle.fill",
+        "play" => "play.fill",
+        "pause" => "pause.fill",
+        "flame" => "flame.fill",
+        "plus" => "plus",
+        "minus" => "minus",
+        "arrow-up" => "arrow.up",
+        "arrow-down" => "arrow.down",
+        "heart" => "heart.fill",
+        "home" => "house.fill",
+        "person" => "person.fill",
+        "bell" => "bell.fill",
+        "clock" => "clock.fill",
+        "calendar" => "calendar",
+        "cloud" => "cloud.fill",
+        "sun" => "sun.max.fill",
+        "moon" => "moon.fill",
+        "drop" => "drop.fill",
+        "music" => "music.note",
+        _ => "questionmark.circle",
+    }
+}
+
 /// A glyph for each icon of the shared set.
 pub fn icon_glyph(name: &str) -> &'static str {
     match name {
@@ -122,6 +175,29 @@ fn rotate_child<'a>(node: &'a Value, ctx: &Ctx) -> Option<&'a Value> {
     }
     let step = (node.get("interval").and_then(Value::as_f64).unwrap_or(60.0).max(1.0) * 1000.0) as i64;
     Some(&kids[(ctx.now_ms / step) as usize % kids.len()])
+}
+
+/// The data each list item draws with: the widget's data plus the item's fields as `item.field`.
+fn list_items(node: &Value, data: &Map<String, Value>) -> Vec<Map<String, Value>> {
+    let max = node.get("max").and_then(Value::as_u64).unwrap_or(8) as usize;
+    node.get("key")
+        .and_then(Value::as_str)
+        .and_then(|k| data.get(k))
+        .and_then(Value::as_array)
+        .map(|items| {
+            items
+                .iter()
+                .take(max)
+                .map(|item| {
+                    let mut d = data.clone();
+                    for (k, v) in item.as_object().into_iter().flatten() {
+                        d.insert(format!("item.{k}"), v.clone());
+                    }
+                    d
+                })
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 fn bool_at(node: &Value, data: &Map<String, Value>) -> bool {
@@ -192,6 +268,22 @@ pub fn text_lines(node: &Value, ctx: &Ctx) -> Vec<String> {
             text()
         )],
         "rotate" => rotate_child(node, ctx).map(|c| text_lines(c, ctx)).unwrap_or_default(),
+        "list" => match children(node).first() {
+            Some(item) => list_items(node, ctx.data)
+                .iter()
+                .flat_map(|d| {
+                    text_lines(
+                        item,
+                        &Ctx {
+                            data: d,
+                            clock: ctx.clock.clone(),
+                            ..*ctx
+                        },
+                    )
+                })
+                .collect(),
+            None => Vec::new(),
+        },
         _ => Vec::new(),
     }
 }
@@ -368,6 +460,27 @@ pub fn html(node: &Value, ctx: &Ctx, out: &mut String) {
             if let Some(c) = rotate_child(node, ctx) {
                 html(c, ctx, out);
             }
+        }
+        "list" => {
+            let gap = s.get("gap").and_then(Value::as_f64).unwrap_or(0.0);
+            let _ = write!(
+                out,
+                "<div style=\"display:flex;flex-direction:column;gap:{gap}px;min-width:0\">"
+            );
+            if let Some(item) = children(node).first() {
+                for d in list_items(node, ctx.data) {
+                    html(
+                        item,
+                        &Ctx {
+                            data: &d,
+                            clock: ctx.clock.clone(),
+                            ..*ctx
+                        },
+                        out,
+                    );
+                }
+            }
+            out.push_str("</div>");
         }
         _ => {}
     }

@@ -25,10 +25,40 @@ pub fn manifest(config: &Config) -> String {
     for (i, w) in config.widgets.iter().enumerate() {
         let _ = write!(
             out,
-            "        <receiver android:name=\"dev.supernsh.widgets.NshWidgetProvider$Slot{slot}\" android:exported=\"true\" android:label=\"{label}\">\n            <intent-filter><action android:name=\"android.appwidget.action.APPWIDGET_UPDATE\"/></intent-filter>\n            <meta-data android:name=\"android.appwidget.provider\" android:resource=\"@xml/nsh_widgets_kind_{i}\"/>\n            <meta-data android:name=\"dev.supernsh.widgets.kind\" android:value=\"{kind}\"/>\n        </receiver>\n",
+            "        <receiver android:name=\"dev.supernsh.widgets.NshWidgetProvider$Slot{slot}\" android:exported=\"true\" android:label=\"{label}\">\n            <intent-filter><action android:name=\"android.appwidget.action.APPWIDGET_UPDATE\"/></intent-filter>\n            <meta-data android:name=\"android.appwidget.provider\" android:resource=\"@xml/nsh_widgets_kind_{i}\"/>\n            <meta-data android:name=\"dev.supernsh.widgets.kind\" android:value=\"{kind}\"/>\n{options}        </receiver>\n",
             slot = i + 1,
             label = xml_escape(&w.name),
             kind = xml_escape(&w.kind),
+            options = match &w.options {
+                Some(o) => format!(
+                    "            <meta-data android:name=\"dev.supernsh.widgets.options\" android:value=\"{}\"/>\n            <meta-data android:name=\"dev.supernsh.widgets.options_title\" android:value=\"{}\"/>\n",
+                    xml_escape(&o.values.join("|")),
+                    xml_escape(&o.title)
+                ),
+                None => String::new(),
+            },
+        );
+    }
+    // Controls become Quick Settings tiles, one service slot each.
+    for (j, c) in config.controls.iter().enumerate() {
+        let icon = c.icon.as_deref().unwrap_or("star").replace('-', "_");
+        let what = match (&c.key, &c.action) {
+            (Some(k), _) => format!(
+                "<meta-data android:name=\"dev.supernsh.widgets.key\" android:value=\"{}\"/>",
+                xml_escape(k)
+            ),
+            (None, Some(a)) => format!(
+                "<meta-data android:name=\"dev.supernsh.widgets.action\" android:value=\"{}\"/>",
+                xml_escape(a)
+            ),
+            _ => String::new(),
+        };
+        let _ = write!(
+            out,
+            "        <service android:name=\"dev.supernsh.widgets.NshTileService$Slot{slot}\" android:exported=\"true\" android:label=\"{label}\"\n            android:icon=\"@drawable/nsh_widgets_icon_{icon}\" android:permission=\"android.permission.BIND_QUICK_SETTINGS_TILE\">\n            <intent-filter><action android:name=\"android.service.quicksettings.action.QS_TILE\"/></intent-filter>\n            <meta-data android:name=\"dev.supernsh.widgets.data\" android:value=\"{data}\"/>\n            {what}\n        </service>\n",
+            slot = j + 1,
+            label = xml_escape(&c.name),
+            data = xml_escape(&c.data),
         );
     }
     out.push_str("    </application>\n</manifest>\n");
@@ -41,9 +71,15 @@ pub fn provider_info(i: usize, w: &WidgetKind) -> String {
     // Android's sizing formula: 73dp per cell minus 16dp, at least 40dp.
     let dp = |cells: u32| (73 * cells).saturating_sub(16).max(40);
     format!(
-        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<appwidget-provider xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:minWidth=\"{w}dp\" android:minHeight=\"{h}dp\" android:targetCellWidth=\"{cols}\" android:targetCellHeight=\"{rows}\"\n    android:minResizeWidth=\"40dp\" android:minResizeHeight=\"40dp\"\n    android:updatePeriodMillis=\"0\" android:initialLayout=\"@layout/nsh_widgets_root\"\n    android:resizeMode=\"horizontal|vertical\" android:widgetCategory=\"home_screen\"\n    android:description=\"@string/nsh_widgets_kind_{i}_description\"/>\n",
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<appwidget-provider xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:minWidth=\"{w}dp\" android:minHeight=\"{h}dp\" android:targetCellWidth=\"{cols}\" android:targetCellHeight=\"{rows}\"\n    android:minResizeWidth=\"40dp\" android:minResizeHeight=\"40dp\"\n    android:updatePeriodMillis=\"0\" android:initialLayout=\"@layout/nsh_widgets_root\"\n    android:resizeMode=\"horizontal|vertical\" android:widgetCategory=\"home_screen\"\n    android:description=\"@string/nsh_widgets_kind_{i}_description\"{configure}/>\n",
         w = dp(cols),
         h = dp(rows),
+        // Kinds with options open the configure screen; on Android 12+ they can be placed with the first value.
+        configure = if w.options.is_some() {
+            "\n    android:configure=\"dev.supernsh.widgets.NshWidgetConfigureActivity\" android:widgetFeatures=\"reconfigurable|configuration_optional\""
+        } else {
+            ""
+        },
     )
 }
 

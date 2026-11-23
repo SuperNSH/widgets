@@ -65,3 +65,16 @@ pub(crate) fn observe(_group: Option<String>) {}
 pub(crate) fn change_count() -> i64 {
     0
 }
+
+/// Live Activities exist only on iOS.
+pub(crate) fn activity_start(_kind: &str, _data: &str) -> Result<(), WidgetError> {
+    Err(WidgetError::Unsupported)
+}
+
+pub(crate) fn activity_update(_kind: &str, _data: &str) -> Result<(), WidgetError> {
+    Err(WidgetError::Unsupported)
+}
+
+pub(crate) fn activity_end(_kind: &str) -> Result<(), WidgetError> {
+    Err(WidgetError::Unsupported)
+}

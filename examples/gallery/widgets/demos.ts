@@ -1,5 +1,5 @@
 // Capability demos: three widgets written once, drawn natively on iOS and Android. No platform code here.
-import { Bars, Clock, Col, ICONS, Icon, type IconName, Progress, Rotate, Row, Spacer, Text, Timer, Toggle } from "nsh-widgets/base";
+import { Bars, Clock, Col, ICONS, Icon, type IconName, List, Progress, Rotate, Row, Spacer, Text, Timer, Toggle } from "nsh-widgets/base";
 import { ActionButton, ButtonRow, Card, Header } from "nsh-widgets/kit";
 
 /** Progress, a bar chart, icons, a gradient banner, an animated number and a widget-side button. */
@@ -79,3 +79,36 @@ export const iconsWidget = () => {
     row(ICONS.slice(14) as IconName[]),
   );
 };
+
+/** A list: Android scrolls every event, iOS draws the first ones that fit. */
+export const agendaWidget = () =>
+  Card(
+    Header("AGENDA", "{count} events"),
+    List(
+      "gap-2 grow",
+      "events",
+      Row("gap-2 items-center", Text("text-xs font-semibold text-primary", "{item.time}"), Text("text-sm text-text", "{item.title}")),
+      12,
+    ),
+  );
+
+/** A configurable widget: the user picks a city; that city's object in the data lies over the rest. */
+export const weatherWidget = () =>
+  Col(
+    "bg-gradient-to-b from-blue-500 to-blue-700 dark:from-blue-800 dark:to-slate-900 p-4 gap-1 grow",
+    Row("gap-1 items-center", Icon("text-white h-4", "cloud"), Text("text-xs font-semibold text-white", "{option}")),
+    Spacer(),
+    Text("text-4xl font-bold text-white", "{temp}°"),
+    Text("text-sm text-blue-50", "{cond}"),
+  );
+
+/** A Live Activity's trees: the banner and expanded island, and the compact island pieces. */
+export const orderActivity = () =>
+  Col(
+    "bg-gradient-to-r from-emerald-600 to-emerald-800 p-4 gap-2",
+    Row("gap-2 items-center", Icon("text-white h-5", "home"), Text("text-sm font-semibold text-white", "Order {order}"), Spacer(), Text("text-xs text-emerald-100", "{status}")),
+    Progress("text-white bg-emerald-900 h-1.5", "progress"),
+    Row("gap-1 items-center", Text("text-xs text-emerald-100", "Arrives in"), Timer("text-xs font-semibold text-white", "eta", "down")),
+  );
+
+export const orderAccessory = () => Row("gap-1 items-center", Icon("text-emerald-400 h-3", "home"), Timer("text-xs font-semibold text-white", "eta", "down"));

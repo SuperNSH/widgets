@@ -65,7 +65,13 @@ pub fn apply(nsh: &mut Value, config: &Config, built: Built) {
     if built.ios {
         let ios = object(root, "ios");
         add_unique(array(object(ios, "entitlements"), GROUPS), json!(config.app_group));
-        object(ios, "infoPlist").insert("NshWidgetsAppGroup".into(), json!(config.app_group));
+        let info = object(ios, "infoPlist");
+        info.insert("NshWidgetsAppGroup".into(), json!(config.app_group));
+        if config.activities.is_empty() {
+            info.remove("NSSupportsLiveActivities");
+        } else {
+            info.insert("NSSupportsLiveActivities".into(), json!(true));
+        }
         set_extension(
             ios,
             json!({

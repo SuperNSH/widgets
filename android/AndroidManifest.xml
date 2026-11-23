@@ -4,5 +4,10 @@
     <application>
         <!-- Not exported: only the widget's own PendingIntents reach it. -->
         <receiver android:name="dev.supernsh.widgets.NshWidgetsActionReceiver" android:exported="false"/>
+        <!-- Opened by the launcher for kinds with options (widgets.json "options"). -->
+        <activity android:name="dev.supernsh.widgets.NshWidgetConfigureActivity" android:exported="true"
+            android:theme="@android:style/Theme.DeviceDefault.Dialog" android:excludeFromRecents="true">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/></intent-filter>
+        </activity>
     </application>
 </manifest>

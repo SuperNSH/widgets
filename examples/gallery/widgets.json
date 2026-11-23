@@ -66,6 +66,58 @@
       "families": [
         "medium"
       ]
+    },
+    {
+      "kind": "Agenda",
+      "name": "Agenda",
+      "description": "A list that scrolls on Android.",
+      "families": [
+        "large"
+      ],
+      "android": {
+        "cells": [
+          4,
+          4
+        ]
+      }
+    },
+    {
+      "kind": "Weather",
+      "name": "Weather",
+      "description": "Pick a city when you add or edit it.",
+      "families": [
+        "small",
+        "medium"
+      ],
+      "options": {
+        "title": "City",
+        "values": [
+          "Karachi",
+          "London",
+          "Tokyo"
+        ]
+      }
+    }
+  ],
+  "activities": [
+    "Order"
+  ],
+  "controls": [
+    {
+      "kind": "FocusToggle",
+      "name": "Ship it",
+      "type": "toggle",
+      "data": "Tasks",
+      "key": "t1",
+      "icon": "check"
+    },
+    {
+      "kind": "CountUp",
+      "name": "Count +1",
+      "type": "button",
+      "data": "Counter",
+      "action": "inc:count",
+      "icon": "plus"
     }
   ]
 }

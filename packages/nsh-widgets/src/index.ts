@@ -6,7 +6,10 @@ import { snapshot, type Node, type SnapshotOptions } from "./base";
 
 export * from "./base";
 
-/** A failed widget call. `code` is stable: invalid_kind, invalid_action, invalid_json, no_app_group, no_group_configured, io, unsupported. */
+/**
+ * A failed widget call. `code` is stable: invalid_kind, invalid_action, invalid_json, no_app_group,
+ * no_group_configured, io, unsupported, activities_disabled, no_activity, activity_refused.
+ */
 export class WidgetError extends Error {
   constructor(
     readonly code: string,
@@ -60,6 +63,23 @@ export const Widgets = {
   /** The button presses since the last call, oldest first. Each is returned once. */
   takeActions(): WidgetAction[] {
     return call<WidgetAction[]>(() => NativeWidgets.takeActions());
+  },
+  /**
+   * Starts `kind` as an iOS Live Activity (it must be listed under "activities" in widgets.json): the
+   * lock screen and the expanded Dynamic Island draw the kind's tree, the compact one its `accessory`
+   * tree, with `data` over the kind's stored data. Publish the tree with `setUi` first. A running
+   * activity of the same kind is replaced. Throws `unsupported` off iOS.
+   */
+  startActivity(kind: string, data: WidgetData = {}): void {
+    call(() => NativeWidgets.startActivity(kind, JSON.stringify(data)));
+  },
+  /** Replaces the running `kind` activity's data. */
+  updateActivity(kind: string, data: WidgetData): void {
+    call(() => NativeWidgets.updateActivity(kind, JSON.stringify(data)));
+  },
+  /** Ends the running `kind` activity, if any. */
+  endActivity(kind: string): void {
+    call(() => NativeWidgets.endActivity(kind));
   },
   /** Redraws `kind`'s placed widgets. */
   reload(kind: string): void {

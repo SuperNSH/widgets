@@ -11,6 +11,9 @@ unsafe extern "C" {
     fn nsh_widgets_info_group() -> *mut c_char;
     fn nsh_widgets_observe(name: *const c_char);
     fn nsh_widgets_change_count() -> isize;
+    fn nsh_widgets_activity_start(kind: *const c_char, data: *const c_char) -> i32;
+    fn nsh_widgets_activity_update(kind: *const c_char, data: *const c_char) -> i32;
+    fn nsh_widgets_activity_end(kind: *const c_char) -> i32;
     fn free(p: *mut c_void);
 }
 
@@ -59,4 +62,36 @@ pub(crate) fn observe(group: Option<String>) {
 pub(crate) fn change_count() -> i64 {
     // SAFETY: no arguments.
     (unsafe { nsh_widgets_change_count() }) as i64
+}
+
+fn activity_result(code: i32, kind: &str) -> Result<(), WidgetError> {
+    match code {
+        0 => Ok(()),
+        2 => Err(WidgetError::ActivitiesDisabled),
+        3 => Err(WidgetError::ActivityRefused),
+        4 => Err(WidgetError::NoActivity(kind.to_owned())),
+        _ => Err(WidgetError::Unsupported),
+    }
+}
+
+fn c(s: &str) -> Result<CString, WidgetError> {
+    CString::new(s).map_err(|_| WidgetError::InvalidJson("a NUL byte in the activity's data".into()))
+}
+
+pub(crate) fn activity_start(kind: &str, data: &str) -> Result<(), WidgetError> {
+    let (k, d) = (c(kind)?, c(data)?);
+    // SAFETY: both strings live across the call; the bridge copies them.
+    activity_result(unsafe { nsh_widgets_activity_start(k.as_ptr(), d.as_ptr()) }, kind)
+}
+
+pub(crate) fn activity_update(kind: &str, data: &str) -> Result<(), WidgetError> {
+    let (k, d) = (c(kind)?, c(data)?);
+    // SAFETY: as above.
+    activity_result(unsafe { nsh_widgets_activity_update(k.as_ptr(), d.as_ptr()) }, kind)
+}
+
+pub(crate) fn activity_end(kind: &str) -> Result<(), WidgetError> {
+    let k = c(kind)?;
+    // SAFETY: as above.
+    activity_result(unsafe { nsh_widgets_activity_end(k.as_ptr()) }, kind)
 }

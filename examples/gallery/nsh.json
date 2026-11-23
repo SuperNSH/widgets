@@ -2,7 +2,7 @@
   "id": "dev.supernsh.widgets.gallery",
   "name": "Widget Gallery",
   "version": "0.1.0",
-  "build": 2,
+  "build": 3,
   "schemes": [
     "nshwidgets"
   ],
@@ -18,7 +18,8 @@
       ]
     },
     "infoPlist": {
-      "NshWidgetsAppGroup": "group.dev.supernsh.widgets.gallery"
+      "NshWidgetsAppGroup": "group.dev.supernsh.widgets.gallery",
+      "NSSupportsLiveActivities": true
     },
     "extensions": [
       {

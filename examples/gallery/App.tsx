@@ -2,7 +2,7 @@ import { effect, lifecycle, mount, signal, Text, UrlScheme, View } from "nsh";
 import { platform } from "os";
 import { Widgets } from "nsh-widgets";
 import { counterWidget } from "./widgets/counter";
-import { dashboardWidget, iconsWidget, liveWidget, stepsAccessory, stepsWidget, tasksWidget } from "./widgets/demos";
+import { agendaWidget, dashboardWidget, iconsWidget, liveWidget, orderAccessory, orderActivity, stepsAccessory, stepsWidget, tasksWidget, weatherWidget } from "./widgets/demos";
 
 const NAMES: Record<string, string> = { macos: "macOS", ios: "iOS", android: "Android" };
 const here = NAMES[platform()] ?? platform();
@@ -23,6 +23,20 @@ function randomDashboard() {
   Widgets.update("Steps", { steps, goal, percent: Math.round((steps / goal) * 100), progress: Math.min(steps / goal, 1) });
 }
 
+let orderStep = 0;
+const ORDER = ["Confirmed", "Preparing", "On the way", "Arriving"];
+function orderData() {
+  return { order: "#1042", status: ORDER[orderStep], progress: (orderStep + 1) / ORDER.length, eta: Date.now() + (ORDER.length - orderStep) * 5 * 60 * 1000 };
+}
+function startOrder() {
+  orderStep = 0;
+  Widgets.startActivity("Order", orderData());
+}
+function advanceOrder() {
+  orderStep = Math.min(orderStep + 1, ORDER.length - 1);
+  Widgets.updateActivity("Order", orderData());
+}
+
 function restartFocus() {
   const now = Date.now();
   Widgets.update("Live", { focusStart: now, breakAt: now + 25 * 60 * 1000 });
@@ -36,6 +50,20 @@ function publish() {
   Widgets.setUi("Tasks", tasksWidget());
   Widgets.setUi("Steps", stepsWidget(), { accessory: stepsAccessory() });
   Widgets.setUi("Icons", iconsWidget());
+  Widgets.setUi("Agenda", agendaWidget());
+  Widgets.setUi("Weather", weatherWidget());
+  Widgets.setUi("Order", orderActivity(), { accessory: orderAccessory() });
+  if (Widgets.data("Agenda").events === undefined) {
+    const titles = ["Standup", "Design review", "Lunch", "Ship the widgets", "1:1", "Code review", "Gym", "Read", "Plan tomorrow", "Dinner", "Call home", "Sleep"];
+    Widgets.update("Agenda", { count: titles.length, events: titles.map((title, i) => ({ time: `${String(8 + i).padStart(2, "0")}:00`, title })) });
+  }
+  if (Widgets.data("Weather").Karachi === undefined) {
+    Widgets.update("Weather", {
+      Karachi: { temp: 31, cond: "Sunny and humid" },
+      London: { temp: 9, cond: "Light rain" },
+      Tokyo: { temp: 16, cond: "Clear" },
+    });
+  }
   if (Widgets.data("Counter").count === undefined) Widgets.update("Counter", { count: 0, label: "tap +1 in the widget" });
   if (Widgets.data("Dashboard").steps === undefined || Widgets.data("Steps").steps === undefined) randomDashboard();
   if (Widgets.data("Live").focusStart === undefined) restartFocus();
@@ -110,6 +138,11 @@ function App() {
         {button("Restart focus timer", "bg-amber-700", guarded("focus timer restarted", restartFocus))}
       </View>
       {button("Publish widget UI", "bg-green-700", guarded("widgets published", publish))}
+      <View class="flex-row gap-3">
+        {button("Start order", "bg-emerald-700", guarded("order activity started", startOrder))}
+        {button("Advance", "bg-emerald-800", guarded("order advanced", advanceOrder))}
+        {button("End", "bg-neutral-700", guarded("order ended", () => Widgets.endActivity("Order")))}
+      </View>
       <Text class="text-base text-neutral-100">{tasks()}</Text>
       <Text class="text-base text-neutral-100">{status()}</Text>
       <Text class="text-base font-semibold text-emerald-300">{presses()}</Text>

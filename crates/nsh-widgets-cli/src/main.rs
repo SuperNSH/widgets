@@ -20,6 +20,7 @@ mod android;
 mod apple;
 mod config;
 mod nshjson;
+mod plasma;
 mod render;
 mod signing;
 mod source;
@@ -35,7 +36,9 @@ usage:
   nsh-widgets build  [--app DIR] [--only ios|macos|android]...
   nsh-widgets check  [--app DIR]
   nsh-widgets preview [--app DIR] [SOURCE] [--out FILE]
-  nsh-widgets show KIND [SOURCE] [--format text|waybar] [--follow]
+  nsh-widgets show KIND [SOURCE] [--format text|waybar|ir] [--follow]
+  nsh-widgets apply KIND ACTION [SOURCE]
+  nsh-widgets plasmoid KIND --group NAME [--plasma 5|6] [--out DIR] [--command PATH]
   nsh-widgets doctor [--app DIR]
 
 DIR holds nsh.json and widgets.json (default: the current directory).
@@ -56,6 +59,11 @@ struct Args {
     format: String,
     follow: bool,
     kind: Option<String>,
+    /// A second positional argument: apply's action.
+    extra: Option<String>,
+    /// plasmoid: the Plasma version (5 or 6) and the command its QML runs.
+    plasma: u32,
+    exe: Option<String>,
 }
 
 fn parse() -> anyhow::Result<Args> {
@@ -71,6 +79,9 @@ fn parse() -> anyhow::Result<Args> {
         format: "text".into(),
         follow: false,
         kind: None,
+        extra: None,
+        plasma: 6,
+        exe: None,
     };
     while let Some(a) = it.next() {
         match a.as_str() {
@@ -84,7 +95,16 @@ fn parse() -> anyhow::Result<Args> {
             "--out" => args.out = Some(it.next().context("--out needs a file")?.into()),
             "--format" => args.format = it.next().context("--format needs text or waybar")?,
             "--follow" => args.follow = true,
+            "--plasma" => {
+                args.plasma = it
+                    .next()
+                    .context("--plasma needs 5 or 6")?
+                    .parse()
+                    .context("--plasma needs 5 or 6")?
+            }
+            "--command" => args.exe = Some(it.next().context("--command needs a path")?),
             other if !other.starts_with("--") && args.kind.is_none() => args.kind = Some(other.to_owned()),
+            other if !other.starts_with("--") && args.extra.is_none() => args.extra = Some(other.to_owned()),
             other => bail!("unknown argument {other}\n\n{USAGE}"),
         }
     }
@@ -115,6 +135,8 @@ fn run() -> anyhow::Result<()> {
         "doctor" => doctor(&args.app),
         "preview" => source::preview(&args),
         "show" => source::show(&args),
+        "apply" => source::apply(&args, args.extra.as_deref().unwrap_or("")),
+        "plasmoid" => plasma::write(&args),
         "" | "help" | "--help" | "-h" => {
             println!("{USAGE}");
             Ok(())

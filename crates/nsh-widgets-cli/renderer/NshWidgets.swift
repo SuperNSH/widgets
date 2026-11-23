@@ -38,6 +38,7 @@ struct UINode: Decodable {
     var mode: String?
     var name: String?
     var interval: Double?
+    var max: Int?
 }
 
 struct UISnapshot: Decodable {
@@ -82,12 +83,27 @@ enum NshUIStore {
               let j = try? JSONSerialization.jsonObject(with: d) as? [String: Any] else { return [:] }
         return j["data"] as? [String: Any] ?? [:]
     }
+    /// The data a widget draws: the kind's data, with the chosen option's object laid over it and
+    /// `option` naming the choice.
+    static func data(_ kind: String, option: String?) -> [String: Any] {
+        var d = data(kind)
+        if let option {
+            if let over = d[option] as? [String: Any] { d.merge(over) { $1 } }
+            d["option"] = option
+        }
+        return d
+    }
+    /// Sets one boolean (a control's toggle), queues it for the app and wakes a running app.
+    static func set(kind: String, key: String, value: Bool) {
+        var body = data(kind)
+        body[key] = value
+        write(kind: kind, body: body, action: "toggle:\(key)")
+    }
     /// Runs one action from the vocabulary on data.json, queues it for the app and wakes a running app.
     static func apply(kind: String, action: String) {
-        guard let d = dir(kind) else { return }
         var body = data(kind)
         let parts = action.split(separator: ":", maxSplits: 1).map(String.init)
-        guard parts.count == 2, !appGroup.isEmpty else { return }
+        guard parts.count == 2 else { return }
         let key = parts[1]
         switch parts[0] {
         case "inc": body[key] = ((body[key] as? Int) ?? 0) + 1
@@ -95,6 +111,11 @@ enum NshUIStore {
         case "toggle": body[key] = !((body[key] as? Bool) ?? false)
         default: return
         }
+        write(kind: kind, body: body, action: action)
+    }
+    /// Writes data.json atomically, appends the action's event to the inbox and wakes a running app.
+    static func write(kind: String, body: [String: Any], action: String) {
+        guard let d = dir(kind), !appGroup.isEmpty else { return }
         try? FileManager.default.createDirectory(at: d, withIntermediateDirectories: true)
         let f = d.appendingPathComponent("data.json")
         if let out = try? JSONSerialization.data(withJSONObject: ["schema": 1, "data": body]) {
@@ -110,7 +131,12 @@ enum NshUIStore {
         else { try? line.data(using: .utf8)!.write(to: inbox) }
         CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(),
             CFNotificationName((appGroup + ".nsh.widgets.action") as CFString), nil, nil, true)
+        #if os(iOS)
+        // Controls show data too: a toggle bound to this kind must redraw.
+        if #available(iOS 18.0, *) { ControlCenter.shared.reloadAllControls() }
+        #endif
     }
+
 }
 
 struct NshActionIntent: AppIntent {
@@ -125,6 +151,8 @@ struct NshActionIntent: AppIntent {
     }
     func perform() async throws -> some IntentResult {
         NshUIStore.apply(kind: kind, action: action)
+        // A control's button changes a kind it is not drawn in: redraw that kind's widgets too.
+        WidgetCenter.shared.reloadTimelines(ofKind: kind)
         return .result()
     }
 }
@@ -274,6 +302,18 @@ struct NodeView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+        case "list":
+            // WidgetKit cannot scroll: draw the first `max` items. {item.field} fills from each item.
+            let items = (node.key.flatMap { data[$0] as? [[String: Any]] } ?? []).prefix(node.max ?? 8)
+            VStack(alignment: .leading, spacing: s.gap ?? 0) {
+                ForEach(Array(items.enumerated()), id: \.offset) { entry in
+                    if let item = kids.first {
+                        NodeView(node: item, data: data.merging(entry.element.reduce(into: [String: Any]()) { $0["item.\($1.key)"] = $1.value }) { $1 },
+                                 kind: kind, font: font, date: date)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .topLeading)
         case "rotate":
             // WidgetKit has no auto-flipping view: the timeline brings one entry per minute, and each shows the next child.
             if !kids.isEmpty {
@@ -316,15 +356,21 @@ struct NshEntry: TimelineEntry {
     let data: [String: Any]
 }
 
+/// Ten one-minute entries let `rotate` and `clock` move without the app; timers tick on their own.
+func nshTimeline(_ kind: String, option: String? = nil) -> Timeline<NshEntry> {
+    let now = Date()
+    let entries = (0..<10).map { i in
+        NshEntry(date: now.addingTimeInterval(Double(i) * 60), snapshot: NshUIStore.snapshot(kind), data: NshUIStore.data(kind, option: option))
+    }
+    return Timeline(entries: entries, policy: .atEnd)
+}
+
 struct NshProvider: TimelineProvider {
     var kind: String
     func placeholder(in context: Context) -> NshEntry { NshEntry(date: Date(), snapshot: nil, data: [:]) }
     func getSnapshot(in context: Context, completion: @escaping (NshEntry) -> Void) { completion(entry()) }
     func getTimeline(in context: Context, completion: @escaping (Timeline<NshEntry>) -> Void) {
-        // Ten one-minute entries let `rotate` and `clock` move without the app; timers tick on their own.
-        let now = Date()
-        let entries = (0..<10).map { entry(now.addingTimeInterval(Double($0) * 60)) }
-        completion(Timeline(entries: entries, policy: .atEnd))
+        completion(nshTimeline(kind))
     }
     private func entry(_ date: Date = Date()) -> NshEntry {
         NshEntry(date: date, snapshot: NshUIStore.snapshot(kind), data: NshUIStore.data(kind))
@@ -355,10 +401,14 @@ struct NshWidgetView: View {
             }
         }
         .padding(EdgeInsets(top: p[0], leading: p[3], bottom: p[2], trailing: p[1]))
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        // Lock-screen circles centre their content; rectangles centre it vertically.
+        .frame(maxWidth: .infinity, maxHeight: .infinity,
+               alignment: family.nshName == "circular" ? .center : family.nshName == "rectangular" ? .leading : .topLeading)
         .widgetURL(entry.snapshot?.url.flatMap(URL.init(string:)))
         .containerBackground(for: .widget) {
-            if accessory {
+            if family.nshName == "circular" {
+                AccessoryWidgetBackground()
+            } else if accessory {
                 Color.clear
             } else if let g = root?.style?.gradient {
                 let (a, b): (UnitPoint, UnitPoint) = g.dir == "r" ? (.leading, .trailing) : g.dir == "br" ? (.topLeading, .bottomTrailing) : (.top, .bottom)
@@ -377,3 +427,60 @@ func nshUIConfiguration(_ kind: String, _ name: String, _ about: String, _ famil
         .contentMarginsDisabled()
 }
 
+
+/// A kind with user-chosen options: `nsh-widgets build` generates an AppEnum of the values and an intent
+/// conforming to this for each such kind.
+protocol NshOptionIntent: WidgetConfigurationIntent {
+    var optionValue: String { get }
+}
+
+struct NshOptionProvider<I: NshOptionIntent>: AppIntentTimelineProvider {
+    var kind: String
+    func placeholder(in context: Context) -> NshEntry { NshEntry(date: Date(), snapshot: nil, data: [:]) }
+    func snapshot(for configuration: I, in context: Context) async -> NshEntry {
+        NshEntry(date: Date(), snapshot: NshUIStore.snapshot(kind), data: NshUIStore.data(kind, option: configuration.optionValue))
+    }
+    func timeline(for configuration: I, in context: Context) async -> Timeline<NshEntry> {
+        nshTimeline(kind, option: configuration.optionValue)
+    }
+}
+
+/// A kind whose widget the user configures: the edit sheet offers the option's values.
+func nshUIConfigurable<I: NshOptionIntent>(_ kind: String, _ intent: I.Type, _ name: String, _ about: String,
+                                           _ families: [WidgetFamily]) -> some WidgetConfiguration {
+    AppIntentConfiguration(kind: kind, intent: intent, provider: NshOptionProvider<I>(kind: kind)) { NshWidgetView(entry: $0, kind: kind) }
+        .configurationDisplayName(name)
+        .description(about)
+        .supportedFamilies(families)
+        .contentMarginsDisabled()
+}
+
+#if os(iOS)
+/// Controls (iOS 18): a toggle reads a boolean from a kind's data and sets it through this intent.
+@available(iOS 18.0, *)
+struct NshSetIntent: SetValueIntent {
+    static var title: LocalizedStringResource = "Set widget value"
+    static var isDiscoverable: Bool = false
+    @Parameter(title: "Kind") var kind: String
+    @Parameter(title: "Key") var key: String
+    @Parameter(title: "On") var value: Bool
+    init() {}
+    init(kind: String, key: String) {
+        self.kind = kind
+        self.key = key
+    }
+    func perform() async throws -> some IntentResult {
+        NshUIStore.set(kind: kind, key: key, value: value)
+        WidgetCenter.shared.reloadTimelines(ofKind: kind)
+        return .result()
+    }
+}
+
+@available(iOS 18.0, *)
+struct NshToggleValue: ControlValueProvider {
+    var kind: String
+    var key: String
+    var previewValue: Bool { false }
+    func currentValue() async throws -> Bool { (NshUIStore.data(kind)[key] as? Bool) ?? false }
+}
+#endif

@@ -240,8 +240,12 @@ pub fn preview(args: &Args) -> anyhow::Result<()> {
     Ok(())
 }
 
-/// One widget as text: lines, or Waybar's JSON (`text` on the bar, the rest as `tooltip`).
+/// One widget as text: lines, Waybar's JSON (`text` on the bar, the rest as `tooltip`), or the IR
+/// itself with its data (`ir`), which the KDE Plasma host draws.
 pub fn show_text(w: &Widget, format: &str, now: i64, clock: String) -> anyhow::Result<String> {
+    if format == "ir" {
+        return Ok(json!({ "snapshot": w.snapshot, "data": w.data, "now": now }).to_string());
+    }
     let family = if format == "waybar" { "inline" } else { "medium" };
     let ctx = Ctx {
         data: &w.data,
@@ -268,7 +272,7 @@ pub fn show_text(w: &Widget, format: &str, now: i64, clock: String) -> anyhow::R
             );
             json!({ "text": lines.join(" "), "tooltip": full.join("\n"), "class": w.kind }).to_string()
         }
-        other => bail!("--format {other}: use text or waybar"),
+        other => bail!("--format {other}: use text, waybar or ir"),
     })
 }
 
@@ -290,4 +294,45 @@ pub fn show(args: &Args) -> anyhow::Result<()> {
         }
         std::thread::sleep(Duration::from_secs(1));
     }
+}
+
+/// Runs one button action (inc:key, dec:key, toggle:key) on a kind's data in a store, as the widget
+/// renderers do, and queues its event for the app. For hosts without a widget process: KDE Plasma.
+pub fn apply(args: &Args, action: &str) -> anyhow::Result<()> {
+    let kind = args
+        .kind
+        .as_deref()
+        .context("apply needs a widget kind: nsh-widgets apply KIND ACTION")?;
+    if !crate::config::valid_kind(kind) {
+        bail!("{kind:?} is not a widget kind");
+    }
+    if !crate::config::valid_action(action) {
+        bail!("{action:?} is not an action (inc:key, dec:key or toggle:key)");
+    }
+    let base = store_root(args)?.join("nsh/widgets");
+    let dir = base.join(kind);
+    std::fs::create_dir_all(&dir)?;
+    let mut data = read_json(&dir.join("data.json"))
+        .ok()
+        .and_then(|v| v.get("data").and_then(Value::as_object).cloned())
+        .unwrap_or_default();
+    let (verb, key) = action.split_once(':').expect("checked");
+    let next = match verb {
+        "inc" => json!(data.get(key).and_then(Value::as_i64).unwrap_or(0) + 1),
+        "dec" => json!(data.get(key).and_then(Value::as_i64).unwrap_or(0) - 1),
+        _ => json!(!data.get(key).and_then(Value::as_bool).unwrap_or(false)),
+    };
+    data.insert(key.to_owned(), next);
+    let tmp = dir.join("data.json.tmp");
+    std::fs::write(&tmp, json!({ "schema": 1, "data": data }).to_string())?;
+    std::fs::rename(&tmp, dir.join("data.json"))?;
+    let at = now_ms();
+    let event = json!({ "id": format!("{at}-{kind}-{action}"), "kind": kind, "action": action, "at": at });
+    use std::io::Write as _;
+    let mut inbox = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(base.join("actions.jsonl"))?;
+    writeln!(inbox, "{event}")?;
+    Ok(())
 }

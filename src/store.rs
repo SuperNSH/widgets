@@ -218,7 +218,7 @@ pub fn parse_action(action: &str) -> Result<(&str, &str), WidgetError> {
 
 /// The node types IR v1 has. A renderer draws an unknown type as nothing.
 pub const NODE_TYPES: &[&str] = &[
-    "col", "row", "text", "button", "spacer", "progress", "bars", "icon", "timer", "clock", "toggle", "rotate",
+    "col", "row", "text", "button", "spacer", "progress", "bars", "icon", "timer", "clock", "toggle", "rotate", "list",
 ];
 
 /// Checks a snapshot's envelope and that every node has a known type.

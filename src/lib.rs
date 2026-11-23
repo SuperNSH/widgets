@@ -39,6 +39,14 @@ pub enum WidgetError {
     Io(String),
     #[error("widgets are not available on this platform")]
     Unsupported,
+    #[error("Live Activities are turned off for this app in Settings")]
+    ActivitiesDisabled,
+    #[error("no Live Activity of kind \"{0}\" is running")]
+    NoActivity(String),
+    #[error(
+        "ActivityKit refused to start the Live Activity: is the kind listed under \"activities\" in widgets.json, and was nsh-widgets build run?"
+    )]
+    ActivityRefused,
 }
 
 impl WidgetError {
@@ -52,6 +60,9 @@ impl WidgetError {
             WidgetError::NoGroupConfigured => "no_group_configured",
             WidgetError::Io(_) => "io",
             WidgetError::Unsupported => "unsupported",
+            WidgetError::ActivitiesDisabled => "activities_disabled",
+            WidgetError::NoActivity(_) => "no_activity",
+            WidgetError::ActivityRefused => "activity_refused",
         }
     }
 }
@@ -107,6 +118,32 @@ pub fn take_actions() -> Result<Vec<Value>, WidgetError> {
 pub fn reload(kind: &str) -> Result<(), WidgetError> {
     store::check_kind(kind)?;
     platform::reload(kind)
+}
+
+/// Starts `kind` as an iOS Live Activity, drawn from the kind's snapshot (`root` on the lock screen
+/// and the expanded Dynamic Island, `accessory` in the compact one) with `data` over its stored data.
+/// A running activity of the same kind is replaced. Elsewhere: [`WidgetError::Unsupported`].
+pub fn start_activity(kind: &str, data: &Value) -> Result<(), WidgetError> {
+    store::check_kind(kind)?;
+    if !data.is_object() {
+        return Err(WidgetError::InvalidJson("activity data must be a JSON object".into()));
+    }
+    platform::activity_start(kind, &data.to_string())
+}
+
+/// Replaces the running `kind` activity's data.
+pub fn update_activity(kind: &str, data: &Value) -> Result<(), WidgetError> {
+    store::check_kind(kind)?;
+    if !data.is_object() {
+        return Err(WidgetError::InvalidJson("activity data must be a JSON object".into()));
+    }
+    platform::activity_update(kind, &data.to_string())
+}
+
+/// Ends the running `kind` activity, if any.
+pub fn end_activity(kind: &str) -> Result<(), WidgetError> {
+    store::check_kind(kind)?;
+    platform::activity_end(kind)
 }
 
 /// Resolves with `kind`'s data the next time a widget button changes it.
@@ -171,6 +208,21 @@ impl NativeWidgets {
     /// Redraws `kind`'s placed widgets.
     pub fn reload(kind: String) -> Result<String, String> {
         js(reload(&kind).map(|()| "null"))
+    }
+
+    /// Starts `kind` as an iOS Live Activity with `json` (an object) as its data.
+    pub fn start_activity(kind: String, json: String) -> Result<String, String> {
+        js(parse(&json).and_then(|v| start_activity(&kind, &v)).map(|()| "null"))
+    }
+
+    /// Replaces the running `kind` activity's data.
+    pub fn update_activity(kind: String, json: String) -> Result<String, String> {
+        js(parse(&json).and_then(|v| update_activity(&kind, &v)).map(|()| "null"))
+    }
+
+    /// Ends the running `kind` activity.
+    pub fn end_activity(kind: String) -> Result<String, String> {
+        js(end_activity(&kind).map(|()| "null"))
     }
 
     /// Resolves with `kind`'s data (JSON) the next time a widget button changes it.

@@ -26,11 +26,12 @@ export type Style = {
   height?: number; // points: bar chart height, progress thickness, icon size
 };
 export type Node = {
-  t: "col" | "row" | "text" | "button" | "spacer" | "progress" | "bars" | "icon" | "timer" | "clock" | "toggle" | "rotate";
+  t: "col" | "row" | "text" | "button" | "spacer" | "progress" | "bars" | "icon" | "timer" | "clock" | "toggle" | "rotate" | "list";
   key?: string; // data.json key a node reads: progress value, bar values, timer date, toggle state
   mode?: "up" | "down"; // timer direction
   name?: string; // icon name from the shared icon set
   interval?: number; // rotate: seconds per child
+  max?: number; // list: the most items drawn
   style?: Style;
   text?: string;
   action?: string;
@@ -184,6 +185,13 @@ export const Clock = (cls: string): Node => ({ t: "clock", style: tw(cls) });
 export const Toggle = (cls: string, key: string, label: string): Node => ({ t: "toggle", style: tw(cls), key, text: label, action: `toggle:${key}` });
 /** Shows its children one at a time, changing every `interval` seconds where the platform can animate it. */
 export const Rotate = (cls: string, interval: number, ...children: Child[]): Node => ({ t: "rotate", style: tw(cls), interval, children: kids(children) });
+
+/**
+ * One `item` tree per object in the array data[key]; `{item.field}` templates fill from each object.
+ * Android scrolls the list (API 31+); WidgetKit cannot scroll, so iOS and macOS draw the first `max`.
+ * Items are for reading: buttons inside an item do nothing.
+ */
+export const List = (cls: string, key: string, item: Node, max = 8): Node => ({ t: "list", style: tw(cls), key, max, children: [item] });
 
 /** Opens the app at `url` (its URL scheme or a universal link). */
 export const Link = (cls: string, url: string, label: string): Node => ({ t: "button", style: tw(cls), action: `open:${url}`, text: label });
