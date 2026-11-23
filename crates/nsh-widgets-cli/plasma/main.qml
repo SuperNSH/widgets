@@ -48,6 +48,7 @@ import QtQuick.Layouts 1.15
     }
 
     @FULL@: Rectangle {
+        id: frame
         Layout.minimumWidth: 160
         Layout.minimumHeight: 160
         Layout.preferredWidth: 340
@@ -59,9 +60,9 @@ import QtQuick.Layouts 1.15
         gradient: st.gradient ? g : null
         Gradient {
             id: g
-            orientation: parent.st.gradient && parent.st.gradient.dir === "r" ? Gradient.Horizontal : Gradient.Vertical
-            GradientStop { position: 0; color: parent.parent.st.gradient ? (main.dark ? parent.parent.st.gradient.from[1] : parent.parent.st.gradient.from[0]) : "transparent" }
-            GradientStop { position: 1; color: parent.parent.st.gradient ? (main.dark ? parent.parent.st.gradient.to[1] : parent.parent.st.gradient.to[0]) : "transparent" }
+            orientation: frame.st.gradient && frame.st.gradient.dir === "r" ? Gradient.Horizontal : Gradient.Vertical
+            GradientStop { position: 0; color: frame.st.gradient ? (main.dark ? frame.st.gradient.from[1] : frame.st.gradient.from[0]) : "transparent" }
+            GradientStop { position: 1; color: frame.st.gradient ? (main.dark ? frame.st.gradient.to[1] : frame.st.gradient.to[0]) : "transparent" }
         }
         Text {
             visible: !main.snap

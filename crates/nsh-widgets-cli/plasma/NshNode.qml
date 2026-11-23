@@ -161,17 +161,17 @@ Item {
         Row {
             id: r
             readonly property var values: (node.vals[node.n.key] || []).filter(function (v) { return typeof v === "number" })
-            readonly property real top: Math.max.apply(null, [1].concat(values))
-            readonly property real h: node.st.height || 48
+            readonly property real peak: Math.max.apply(null, [1].concat(values))
+            readonly property real chartHeight: node.st.height || 48
             spacing: node.st.gap || 4
-            implicitHeight: h
+            implicitHeight: chartHeight
             implicitWidth: 40
             Repeater {
                 model: r.values
                 delegate: Rectangle {
                     anchors.bottom: parent.bottom
                     width: (r.width - r.spacing * Math.max(0, r.values.length - 1)) / Math.max(1, r.values.length)
-                    height: Math.max(2, r.h * modelData / r.top)
+                    height: Math.max(2, r.chartHeight * modelData / r.peak)
                     radius: 3
                     color: node.fg
                 }
