@@ -1,0 +1,9 @@
+{
+  "appGroup": "group.dev.supernsh.widgets.gallery",
+  "widgets": [
+    { "kind": "Counter", "name": "Counter", "description": "A number the app sets and the widget's buttons change.", "families": ["small", "medium"] },
+    { "kind": "Dashboard", "name": "Dashboard", "description": "Progress, a bar chart and icons.", "families": ["large"], "android": { "cells": [4, 3] } },
+    { "kind": "Live", "name": "Focus timer", "description": "A stopwatch, a countdown, a clock and rotating tips that move without the app.", "families": ["medium", "small"] },
+    { "kind": "Tasks", "name": "Tasks", "description": "Switches that work without opening the app.", "families": ["medium", "large"], "android": { "cells": [4, 3] } }
+  ]
+}

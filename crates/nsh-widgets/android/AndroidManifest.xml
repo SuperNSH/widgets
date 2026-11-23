@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="dev.supernsh.widgets">
+    <uses-sdk android:minSdkVersion="26"/>
+    <application>
+        <!-- Not exported: only the widget's own PendingIntents reach it. -->
+        <receiver android:name="dev.supernsh.widgets.NshWidgetsActionReceiver" android:exported="false"/>
+    </application>
+</manifest>

@@ -1,0 +1,61 @@
+{
+  "id": "dev.supernsh.widgets.gallery",
+  "name": "Widget Gallery",
+  "version": "0.1.0",
+  "build": 1,
+  "schemes": [
+    "nshwidgets"
+  ],
+  "dependencies": {
+    "nsh-widgets": {
+      "path": "../../crates/nsh-widgets"
+    }
+  },
+  "ios": {
+    "entitlements": {
+      "com.apple.security.application-groups": [
+        "group.dev.supernsh.widgets.gallery"
+      ]
+    },
+    "infoPlist": {
+      "NshWidgetsAppGroup": "group.dev.supernsh.widgets.gallery"
+    },
+    "extensions": [
+      {
+        "path": ".nsh-widgets/iphoneos/NshWidgets.appex",
+        "simulatorPath": ".nsh-widgets/iphonesimulator/NshWidgets.appex",
+        "entitlements": {
+          "com.apple.security.application-groups": [
+            "group.dev.supernsh.widgets.gallery"
+          ]
+        }
+      }
+    ]
+  },
+  "macos": {
+    "entitlements": {
+      "com.apple.security.application-groups": [
+        "group.dev.supernsh.widgets.gallery"
+      ]
+    },
+    "infoPlist": {
+      "NshWidgetsAppGroup": "group.dev.supernsh.widgets.gallery"
+    },
+    "extensions": [
+      {
+        "path": ".nsh-widgets/macosx/NshWidgets.appex",
+        "entitlements": {
+          "com.apple.security.app-sandbox": true,
+          "com.apple.security.application-groups": [
+            "group.dev.supernsh.widgets.gallery"
+          ]
+        }
+      }
+    ]
+  },
+  "android": {
+    "libraries": [
+      ".nsh-widgets/android/nsh-widgets-app.aar"
+    ]
+  }
+}

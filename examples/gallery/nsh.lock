@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "packages": [
+    {
+      "name": "nsh-widgets",
+      "version": "0.1.0",
+      "path": "../../crates/nsh-widgets",
+      "module": "nsh-widgets/native"
+    }
+  ]
+}

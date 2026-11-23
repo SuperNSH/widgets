@@ -1,0 +1,20 @@
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test data_must_be_an_object ... ok
+test kinds_are_checked ... ok
+test unknown_actions_are_refused ... ok
+test data_starts_empty_and_round_trips_in_an_envelope ... ok
+test snapshots_are_checked_before_they_are_written ... ok
+test update_keeps_what_the_widget_changed ... ok
+test actions_run_the_vocabulary_and_queue_events_once ... ok
+test the_change_token_moves_when_data_is_written ... ok
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+test tests::nsh_json_keeps_the_apps_keys_and_replaces_only_ours ... ok
+test tests::unknown_config_keys_are_errors ... ok
+test tests::info_plists_carry_the_group_and_fonts ... ok
+test tests::the_android_manifest_gives_each_kind_a_slot ... ok
+test tests::the_bundle_names_every_kind_and_groups_by_ten ... ok
+test tests::config_problems_are_listed ... ok
+test tests::the_android_library_is_a_valid_aar ... ok
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test crates/nsh-widgets/src/lib.rs - (line 9) - compile ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

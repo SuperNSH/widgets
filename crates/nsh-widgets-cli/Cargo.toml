@@ -1,0 +1,21 @@
+[package]
+name = "nsh-widgets-cli"
+description = "The nsh-widgets command: builds an NSH app's widget extensions and Android widget library from widgets.json."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "nsh-widgets"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+zip = { version = "2", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+tempfile = "3"

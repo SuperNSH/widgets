@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: stable
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  rust:
+    name: rust (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: stable
+          components: clippy
+      # On macOS this also compiles the Swift bridge.
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace --all-targets
+
+  cross-check:
+    name: check (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-latest, target: aarch64-apple-ios }
+          - { os: macos-latest, target: aarch64-apple-ios-sim }
+          - { os: ubuntu-latest, target: aarch64-linux-android }
+          - { os: ubuntu-latest, target: wasm32-unknown-unknown }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: stable
+          components: clippy
+          targets: ${{ matrix.target }}
+      - run: cargo clippy -p nsh-widgets --target ${{ matrix.target }} -- -D warnings
+
+  android-library:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
+        with:
+          distribution: temurin
+          java-version: "17"
+      # Rebuilds the committed AAR from its sources: the Java must compile against the SDK.
+      - run: scripts/build-aar.sh
+
+  apple-extension:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: stable
+      # Builds the gallery's widget extension for the simulator, devices and macOS, and its Android library.
+      - run: cargo run -p nsh-widgets-cli -- build --app examples/gallery
+      - run: cargo run -p nsh-widgets-cli -- check --app examples/gallery
+      - run: test -d examples/gallery/.nsh-widgets/iphonesimulator/NshWidgets.appex/Metadata.appintents
+
+  typescript:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install NSH
+        env:
+          NSH_VERSION: v0.6.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/SuperNSH/nsh-builds/master/install.sh | sh
+          echo "$HOME/.nsh/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Check, build and test
+        working-directory: packages/nsh-widgets
+        run: |
+          nsh check
+          nsh build 2>&1 | tee build.log
+          ! grep -i warn build.log
+          nsh test

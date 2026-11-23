@@ -1,0 +1,6 @@
+target/
+/.tools
+.nsh/
+.nsh-widgets/
+*.log
+.DS_Store

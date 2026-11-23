@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nsh-widgets</title>
+<style>
+  :root { color-scheme: light dark; --fg: #1d1d1f; --bg: #fff; --muted: #6e6e73; --line: #d2d2d7; }
+  @media (prefers-color-scheme: dark) { :root { --fg: #f5f5f7; --bg: #000; --muted: #a1a1a6; --line: #424245; } }
+  body { margin: 0; padding: 24px 16px; background: var(--bg); color: var(--fg);
+         font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 680px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin: 0 0 8px; }
+  h2 { font-size: 1.1rem; margin: 24px 0 8px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0; padding-left: 20px; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  th, td { text-align: left; padding: 4px 8px 4px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  code { font: 0.9em ui-monospace, monospace; }
+  .muted { color: var(--muted); }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>nsh-widgets</h1>
+  <p>Home-screen widgets for Native Shell (NSH) apps.</p>
+  <p>The app describes each widget once, as a tree of primitives written in TSX or JSON, and feeds it data. A generic renderer draws the tree natively: SwiftUI in a WidgetKit extension on iOS and macOS, RemoteViews on Android. Widget buttons change the data without the app.</p>
+
+  <h2>Status: 0.1.0, unreleased</h2>
+  <table>
+    <tr><th>Platform</th><th>State</th></tr>
+    <tr><td>iOS 27 simulator</td><td>Verified: gallery listing, placement, widget presses seen by the app.</td></tr>
+    <tr><td>Android 17 emulator</td><td>Verified: picker listing, presses with the app idle, app-side redraw, switches.</td></tr>
+    <tr><td>macOS</td><td>Extension builds. Not placed on a Mac yet. Unverified.</td></tr>
+    <tr><td>Physical devices</td><td>Not tested.</td></tr>
+    <tr><td>Linux, Windows, web</td><td>No widget host.</td></tr>
+  </table>
+  <p class="muted">Needs NSH main at or after <code>5aa56b19</code>; the 0.6.0 release cannot package widget extensions.</p>
+
+  <h2>Primitives</h2>
+  <p><code>Col</code>, <code>Row</code>, <code>Text</code>, <code>Spacer</code>, <code>Button</code>, <code>Link</code>, <code>Progress</code>, <code>Bars</code>, <code>Icon</code>, <code>Timer</code>, <code>Clock</code>, <code>Toggle</code>, <code>Rotate</code>, styled with a Tailwind subset and light and dark theme tokens. Buttons run <code>inc:key</code>, <code>dec:key</code>, <code>toggle:key</code> or open a URL.</p>
+
+  <h2>Docs</h2>
+  <ul>
+    <li><a href="https://github.com/SuperNSH/widgets/blob/master/docs/getting-started.md">Getting started</a></li>
+    <li><a href="https://github.com/SuperNSH/widgets/blob/master/docs/ir.md">Widget Tree IR v1</a></li>
+    <li><a href="https://github.com/SuperNSH/widgets/blob/master/docs/capabilities.md">Capabilities by platform</a></li>
+    <li><a href="https://github.com/SuperNSH/widgets/blob/master/docs/status.md">Status and evidence</a></li>
+    <li><a href="https://github.com/SuperNSH/widgets/blob/master/docs/decisions.md">Decisions</a></li>
+  </ul>
+  <p class="muted">Source: <a href="https://github.com/SuperNSH/widgets">SuperNSH/widgets</a>. MIT.</p>
+</main>
+</body>
+</html>
