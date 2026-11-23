@@ -1,8 +1,8 @@
 # Capabilities by platform
 
-One tree, three renderers. iOS and macOS share the SwiftUI renderer ([`NshWidgets.swift`](../crates/nsh-widgets-cli/renderer/NshWidgets.swift)); Android has the RemoteViews renderer ([`NshWidgets.java`](../crates/nsh-widgets/android/src/dev/supernsh/widgets/NshWidgets.java)). This page lists where they differ and why.
+One tree, three native renderers. iOS and macOS share the SwiftUI renderer ([`NshWidgets.swift`](../crates/nsh-widgets-cli/renderer/NshWidgets.swift), with [`NshActivities.swift`](../crates/nsh-widgets-cli/renderer/NshActivities.swift) for Live Activities); Android has the RemoteViews renderer ([`NshWidgets.java`](../android/src/dev/supernsh/widgets/NshWidgets.java)); KDE Plasma has a QML renderer ([`NshNode.qml`](../crates/nsh-widgets-cli/plasma/NshNode.qml), see [below](#kde-plasma)). This page lists where they differ and why.
 
-The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 (API 37) emulator, or read from the platform's API where noted. The macOS column follows from the shared renderer; this library build has not been placed on a Mac, so it is unverified. See [status.md](status.md).
+The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 (API 37) emulator, or read from the platform's API where noted. The macOS column follows from the shared renderer; the 0.1.0 features were seen on a Mac desktop, the 0.2.0 ones (options, lists) were not. See [status.md](status.md).
 
 | Feature | iOS | Android | macOS |
 |---|---|---|---|
@@ -25,7 +25,11 @@ The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 
 | Fonts | bundled fonts work (`UIAppFonts`) | system `sans-serif` only, see below | bundled fonts work (`ATSApplicationFontsPath`) |
 | Font weight | `Font.Weight` | `textFontWeight` (API 28+) with a bold fallback, one layout per weight | as iOS |
 | Sizes | families `small`, `medium`, `large`, `extraLarge` (iPad), and the lock-screen `circular`, `rectangular`, `inline` with their own `accessory` tree | cells from `widgets.json`; the family name for `hide` comes from `OPTION_APPWIDGET_MIN_WIDTH`: under 200 dp small, under 450 medium, else large | as iOS, with `extraLarge` |
-| Lock screen | `accessory` tree; the system draws it monochrome (vibrant) | none | none |
+| Lock screen | `accessory` tree; the system draws it monochrome (vibrant); `circular` is centred on `AccessoryWidgetBackground` | none | none |
+| Live Activities | iOS 16.2+: lock-screen banner and expanded Dynamic Island draw `root`, compact and minimal draw `accessory`; data is the activity's over the kind's | none (`unsupported`) | none (`unsupported`) |
+| Options (user-configured widgets) | edit sheet from a generated `AppEnum` and `WidgetConfigurationIntent` | configure screen (`NshWidgetConfigureActivity`), reopened from the launcher's "Settings"; placed with the first value on Android 12+ | as iOS |
+| `list` | the first `max` items (WidgetKit cannot scroll) | API 31+: a scrolling list of every item (`RemoteCollectionItems`), one per widget; older: the first `max` | as iOS |
+| Controls | iOS 18+: Control Center and lock-screen controls (`ControlWidgetToggle`, `ControlWidgetButton`) | Quick Settings tiles (`NshTileService$Slot1` to `$Slot8`); a toggle tile is active while its key is true | none |
 | Padding | the root's `pad`, 16 by default; content margins off | the root's `pad`, 16 by default | as iOS |
 | Where data lives | App Group container | the app's files directory | App Group container (`macosAppGroup`) |
 | App hears presses live | Darwin notification `<group>.nsh.widgets.action`, then the data is re-read | the receiver runs in the app's process; `data.json`'s modification time changes | as iOS |
@@ -40,12 +44,41 @@ The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 
 
 **iOS toggles.** A widget `Toggle` draws only a tinted pill, and forcing `.switch` shows the unsupported placeholder. The checklist row reads clearly in both states.
 
+**iOS Live Activities.** iOS asks the user once whether to allow Live Activities from the app. In the expanded Dynamic Island the tree draws on black with 8 points of side padding; the island's curved corners can still clip the first characters of a line at its edges (seen with "Arrives in" in [activity-island-expanded.png](evidence/ios/activity-island-expanded.png)). On the lock screen iOS drew the banner's countdown as "19:––" ([activity-lock-screen.png](evidence/ios/activity-lock-screen.png)); the island showed full seconds.
+
+**Android list.** RemoteViews takes a collection adapter only on the views given to `updateAppWidget`, not on nested ones, so the renderer sets the list's `RemoteCollectionItems` on the root views. That allows one scrolling list per widget.
+
+**Android tiles.** A tile carries the control's shared icon and name. Taps sent with `adb shell input tap` on a tile did not register on the Android 17 emulator; `adb shell cmd statusbar click-tile` did, and runs the same `TileService.onClick`. A finger tap on a device is untested.
+
 **iOS gallery cache.** New kinds appear in the widget gallery only after restarting the simulator (SpringBoard) when the gallery cached the old kinds. The simulator sometimes redraws one press late.
 
 **macOS.** Needs a real signing identity (a free Personal Team works) and a team-prefixed App Group in `macosAppGroup`. The app must run from a LaunchServices-indexed place such as `~/Applications`, or App Intents fail with "There is no metadata". New kinds need a `CFBundleVersion` bump (`build` in `nsh.json`). The extension is built for arm64 only.
 
-**Linux and Windows.** No system widget host. Once the app calls `configure(name)`, the store lives in `$XDG_DATA_HOME/nsh-widgets/<name>` (`~/.local/share/...` without it, `%LOCALAPPDATA%` on Windows), or in `NSH_WIDGETS_DIR` when set. `reload` does nothing. `nsh-widgets show KIND --group <name> [--follow] [--format waybar]` draws a widget as text (progress as `▓░`, bars as a sparkline, toggles as `☑`/`☐`, timers counting) or as Waybar JSON, whose bar text comes from the `accessory` tree. Without a name or the variable, calls fail with `no_group_configured`.
+**Linux and Windows.** KDE Plasma draws widgets through a generated plasmoid (below); GNOME and Windows have no widget host for them. Once the app calls `configure(name)`, the store lives in `$XDG_DATA_HOME/nsh-widgets/<name>` (`~/.local/share/...` without it, `%LOCALAPPDATA%` on Windows), or in `NSH_WIDGETS_DIR` when set. `reload` does nothing. `nsh-widgets show KIND --group <name> [--follow] [--format waybar]` draws a widget as text (progress as `▓░`, bars as a sparkline, toggles as `☑`/`☐`, timers counting) or as Waybar JSON, whose bar text comes from the `accessory` tree. Without a name or the variable, calls fail with `no_group_configured`.
 
 **Web.** No store: calls fail with `no_group_configured`, or `unsupported` once a name is configured.
+
+## KDE Plasma
+
+`nsh-widgets plasmoid` writes a Plasma applet whose QML renderer reads the store through `nsh-widgets show --format ir` every two seconds and runs presses through `nsh-widgets apply`. Seen on Plasma 5.27; the Plasma 6 package is generated from the same renderer but has not been run.
+
+| Feature | KDE Plasma |
+|---|---|
+| Layout | a `GridLayout` per `col` or `row` (one column or one row), children loaded from `NshNode.qml` itself; rows align their children to the vertical centre |
+| Light and dark colours | dark when the Kirigami theme's background is dark |
+| Root background and padding | the root's `bg` or gradient fills a rounded frame (radius 16) behind the content; the root's `pad`, 16 by default |
+| Gradients | `r` horizontal; `b` and `br` both vertical (QML's `Gradient` has no diagonal) |
+| Text | `Text`; a bundled font applies only if it is installed on the machine |
+| Icons | Unicode and emoji glyphs (★ ⚡ ✓ ...), sized like the other platforms |
+| `progress`, `bars` | rounded rectangles |
+| `timer`, `clock` | counted in QML each second (`h:mm:ss` or `m:ss`, `hh:mm`) |
+| `rotate` | changes child every `interval` seconds |
+| `toggle` | a ☑ or ☐ row, struck through when on |
+| Buttons | `inc`, `dec`, `toggle` run `nsh-widgets apply`, which changes the data and queues the event; `open:` opens the URL |
+| `list` | a scrolling `ListView` of the first `max` items |
+| `hide` | `small` under 200 pixels wide, `medium` under 450, else `large`; `inline` in a panel |
+| In a panel | the `accessory` tree; clicking opens the full widget |
+| Not supported | the widget `url`, options, Live Activities, controls |
+| Updates | polled every two seconds, so a change in the app shows within about two seconds |
 
 **Preview.** `nsh-widgets preview` draws the IR as HTML with the same rules (sizes per family, root background and padding, templates, timers at the current time). It is a check, not a fourth renderer: the native renderers are the reference.

@@ -25,7 +25,9 @@ Item {
     visible: !hidden
     implicitWidth: hidden || !body.item ? 0 : body.item.implicitWidth
     implicitHeight: hidden || !body.item ? 0 : body.item.implicitHeight
-    Layout.fillWidth: !hidden && (n.t === "col" || n.t === "progress" || n.t === "bars" || n.t === "list"
+    // A row with a spacer stretches, as SwiftUI's HStack with a Spacer does.
+    readonly property bool hasSpacer: !!(n.children && n.children.some(function (c) { return c.t === "spacer" }))
+    Layout.fillWidth: !hidden && (n.t === "col" || (n.t === "row" && hasSpacer) || n.t === "progress" || n.t === "bars" || n.t === "list"
         || n.t === "rotate" || (n.t === "spacer" && inRow) || (n.t === "toggle"))
     Layout.fillHeight: !hidden && ((n.t === "spacer" && !inRow) || st.grow === true || n.t === "list")
     Layout.preferredWidth: implicitWidth
@@ -69,12 +71,15 @@ Item {
         Rectangle {
             radius: Math.min(node.st.radius || 0, height / 2)
             color: node.st.gradient ? "transparent" : (node.pick(node.st.bg) || "transparent")
-            gradient: node.st.gradient ? grad : null
-            Gradient {
-                id: grad
-                orientation: node.st.gradient && node.st.gradient.dir === "r" ? Gradient.Horizontal : Gradient.Vertical
-                GradientStop { position: 0; color: node.st.gradient ? node.pick(node.st.gradient.from) : "transparent" }
-                GradientStop { position: 1; color: node.st.gradient ? node.pick(node.st.gradient.to) : "transparent" }
+            Rectangle {
+                visible: !!node.st.gradient
+                anchors.fill: parent
+                radius: parent.radius
+                gradient: Gradient {
+                    orientation: node.st.gradient && node.st.gradient.dir === "r" ? Gradient.Horizontal : Gradient.Vertical
+                    GradientStop { position: 0; color: node.st.gradient ? node.pick(node.st.gradient.from) : "transparent" }
+                    GradientStop { position: 1; color: node.st.gradient ? node.pick(node.st.gradient.to) : "transparent" }
+                }
             }
             implicitWidth: lay.implicitWidth + node.pad[1] + node.pad[3]
             implicitHeight: lay.implicitHeight + node.pad[0] + node.pad[2]
@@ -95,11 +100,17 @@ Item {
                         Layout.fillHeight: item ? item.Layout.fillHeight : false
                         Layout.preferredWidth: item ? item.implicitWidth : 0
                         Layout.preferredHeight: item ? item.implicitHeight : 0
-                        Layout.alignment: node.n.t === "row" ? Qt.AlignVCenter
+                        Layout.alignment: node.n.t === "row" ? (Qt.AlignVCenter | Qt.AlignLeft)
                             : node.st.align === "center" ? Qt.AlignHCenter : node.st.align === "end" ? Qt.AlignRight : Qt.AlignLeft
                         Component.onCompleted: setSource("NshNode.qml", node.childProps(modelData, null, node.n.t === "row"))
                         onLoaded: item.now = Qt.binding(function () { return node.now })
                     }
+                }
+                // A row without a spacer keeps its children at the start when it is wider than they are.
+                Item {
+                    visible: node.n.t === "row" && !node.hasSpacer
+                    Layout.fillWidth: visible
+                    Layout.preferredWidth: 0
                 }
             }
         }
@@ -115,7 +126,6 @@ Item {
             font.pixelSize: node.st.size || 14
             font.weight: node.weight
             font.family: node.fontFamily || font.family
-            elide: Text.ElideRight
         }
     }
 
@@ -158,22 +168,30 @@ Item {
 
     Component {
         id: bars
-        Row {
+        Item {
             id: r
             readonly property var values: (node.vals[node.n.key] || []).filter(function (v) { return typeof v === "number" })
             readonly property real peak: Math.max.apply(null, [1].concat(values))
             readonly property real chartHeight: node.st.height || 48
-            spacing: node.st.gap || 4
+            readonly property real gap: node.st.gap || 4
             implicitHeight: chartHeight
             implicitWidth: 40
-            Repeater {
-                model: r.values
-                delegate: Rectangle {
-                    anchors.bottom: parent.bottom
-                    width: (r.width - r.spacing * Math.max(0, r.values.length - 1)) / Math.max(1, r.values.length)
-                    height: Math.max(2, r.chartHeight * modelData / r.peak)
-                    radius: 3
-                    color: node.fg
+            Row {
+                anchors.fill: parent
+                spacing: r.gap
+                Repeater {
+                    model: r.values
+                    delegate: Item {
+                        width: (r.width - r.gap * Math.max(0, r.values.length - 1)) / Math.max(1, r.values.length)
+                        height: r.chartHeight
+                        Rectangle {
+                            anchors.bottom: parent.bottom
+                            width: parent.width
+                            height: Math.max(2, r.chartHeight * modelData / r.peak)
+                            radius: 3
+                            color: node.fg
+                        }
+                    }
                 }
             }
         }
@@ -208,8 +226,6 @@ Item {
         Loader {
             readonly property var kids: node.n.children || []
             readonly property int index: kids.length ? Math.floor(node.now / (1000 * Math.max(1, node.n.interval || 60))) % kids.length : -1
-            implicitWidth: item ? item.implicitWidth : 0
-            implicitHeight: item ? item.implicitHeight : 0
             onIndexChanged: if (index >= 0) setSource("NshNode.qml", node.childProps(kids[index], null, false))
             Component.onCompleted: if (index >= 0) setSource("NshNode.qml", node.childProps(kids[index], null, false))
         }
@@ -218,7 +234,7 @@ Item {
     Component {
         id: list
         ListView {
-            // Plasma scrolls the list, as Android does; every item is drawn.
+            // Plasma scrolls the list, as Android does, through the first `max` items.
             clip: true
             spacing: node.st.gap || 0
             implicitHeight: Math.min(contentHeight, 400)

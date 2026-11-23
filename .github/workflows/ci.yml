@@ -132,3 +132,8 @@ jobs:
       - name: Type-check the gallery
         working-directory: examples/gallery
         run: nsh check
+      - name: Generate a Plasma 5 and a Plasma 6 widget
+        run: |
+          cargo run -q -p nsh-widgets-cli -- plasmoid Dashboard --group dev.supernsh.widgets.gallery --plasma 5 --out /tmp/p5
+          cargo run -q -p nsh-widgets-cli -- plasmoid Dashboard --group dev.supernsh.widgets.gallery --plasma 6 --out /tmp/p6
+          test -f /tmp/p5/contents/ui/NshNode.qml && test -f /tmp/p6/metadata.json

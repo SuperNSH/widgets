@@ -50,9 +50,9 @@ import QtQuick.Layouts 1.15
     @FULL@: Rectangle {
         id: frame
         Layout.minimumWidth: 160
-        Layout.minimumHeight: 160
+        Layout.minimumHeight: tree.item ? Math.max(120, tree.item.implicitHeight + pad[0] + pad[2]) : 160
         Layout.preferredWidth: 340
-        Layout.preferredHeight: 200
+        Layout.preferredHeight: tree.item ? Math.max(120, tree.item.implicitHeight + pad[0] + pad[2]) : 200
         readonly property var st: main.snap && main.snap.root && main.snap.root.style ? main.snap.root.style : ({})
         readonly property var pad: st.pad || [16, 16, 16, 16]
         radius: 16

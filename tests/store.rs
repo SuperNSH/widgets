@@ -123,3 +123,10 @@ fn the_lock_screen_tree_is_checked_too() {
     let bad = json!({ "v": 1, "root": root, "accessory": { "t": "canvas" } });
     assert!(store.set_ui("Steps", &bad).is_err());
 }
+
+#[test]
+fn lists_are_a_node_type() {
+    let (_dir, store) = temp();
+    let snap = json!({ "v": 1, "root": { "t": "list", "key": "events", "max": 5, "children": [{ "t": "text", "text": "{item.title}" }] } });
+    store.set_ui("Agenda", &snap).unwrap();
+}

@@ -25,22 +25,23 @@
 <main>
   <h1>nsh-widgets</h1>
   <p>Home-screen widgets for Native Shell (NSH) apps.</p>
-  <p>The app describes each widget once, as a tree of primitives written in TSX or JSON, and feeds it data. A generic renderer draws the tree natively: SwiftUI in a WidgetKit extension on iOS and macOS, RemoteViews on Android. Widget buttons change the data without the app.</p>
+  <p>The app describes each widget once, as a tree of primitives written in TSX or JSON, and feeds it data. A generic renderer draws the tree natively: SwiftUI in a WidgetKit extension on iOS and macOS, RemoteViews on Android, QML in a generated KDE Plasma widget. Widget buttons change the data without the app.</p>
+  <p>The same trees drive iOS Live Activities. Widgets can let the user pick a value, draw lists, and an app can add iOS 18 Control Center controls and Android Quick Settings tiles bound to a widget's data.</p>
 
-  <h2>Status: 0.1.0</h2>
+  <h2>Status: 0.2.0</h2>
   <table>
     <tr><th>Platform</th><th>State</th></tr>
-    <tr><td>iOS 27 simulator</td><td>Verified: gallery listing, placement, widget presses seen by the app.</td></tr>
-    <tr><td>Android 17 emulator</td><td>Verified: picker listing, presses with the app idle, app-side redraw, switches.</td></tr>
-    <tr><td>macOS</td><td>Verified on a desktop: rendering with the app's data, a toggle without the app.</td></tr>
-    <tr><td>iOS lock screen</td><td>Builds and registers. Rendering unverified.</td></tr>
+    <tr><td>iOS 27 simulator</td><td>Verified: home and lock-screen widgets, presses seen by the app, a Live Activity in the Dynamic Island and on the lock screen, an options edit sheet, a list, Control Center controls.</td></tr>
+    <tr><td>Android 17 emulator</td><td>Verified: presses with the app idle, app-side redraw, switches, a scrolling list, a configure screen, Quick Settings tiles.</td></tr>
+    <tr><td>KDE Plasma 5.27</td><td>Verified in <code>plasmoidviewer</code>: drawing, button presses, toggles, a scrolling list. Plasma 6 is generated but unverified.</td></tr>
+    <tr><td>macOS</td><td>0.1.0 widgets verified on a desktop. Options and lists unverified.</td></tr>
     <tr><td>Physical devices</td><td>Not tested.</td></tr>
-    <tr><td>Linux, Windows</td><td>No system widget host. <code>nsh-widgets show</code> prints a widget for a terminal or Waybar.</td></tr>
+    <tr><td>GNOME, Windows</td><td>No widget host. <code>nsh-widgets show</code> prints a widget for a terminal or Waybar.</td></tr>
   </table>
-  <p class="muted">Install with <code>nsh add github:SuperNSH/widgets@^0.1</code>. Needs NSH main at or after <code>5aa56b19</code>, or the nightly; the 0.6.0 and 0.6.1 releases cannot package widget extensions.</p>
+  <p class="muted">Install with <code>nsh add github:SuperNSH/widgets@^0.2</code>. Needs NSH main at or after <code>5aa56b19</code>, or the nightly; the 0.6.0 and 0.6.1 releases cannot package widget extensions.</p>
 
   <h2>Primitives</h2>
-  <p><code>Col</code>, <code>Row</code>, <code>Text</code>, <code>Spacer</code>, <code>Button</code>, <code>Link</code>, <code>Progress</code>, <code>Bars</code>, <code>Icon</code>, <code>Timer</code>, <code>Clock</code>, <code>Toggle</code>, <code>Rotate</code>, styled with a Tailwind subset and light and dark theme tokens, with 21 shared icons and gradients on every platform. Buttons run <code>inc:key</code>, <code>dec:key</code>, <code>toggle:key</code> or open a URL.</p>
+  <p><code>Col</code>, <code>Row</code>, <code>Text</code>, <code>Spacer</code>, <code>Button</code>, <code>Link</code>, <code>Progress</code>, <code>Bars</code>, <code>Icon</code>, <code>Timer</code>, <code>Clock</code>, <code>Toggle</code>, <code>Rotate</code>, <code>List</code>, styled with a Tailwind subset and light and dark theme tokens, with 21 shared icons and gradients on every platform. Buttons run <code>inc:key</code>, <code>dec:key</code>, <code>toggle:key</code> or open a URL.</p>
 
   <h2>Docs</h2>
   <ul>

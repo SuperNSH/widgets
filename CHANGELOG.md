@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0 (2026-11-24)
+
+- Live Activities on iOS. `widgets.json` `activities` lists the kinds that can run as one. `Widgets.startActivity(kind, data)`, `updateActivity`, `endActivity` in TS; `start_activity`, `update_activity`, `end_activity` in Rust. The lock-screen banner and the expanded Dynamic Island draw the kind's `root` tree; the compact and minimal Dynamic Island draw its `accessory` tree, a row's first child leading and the rest trailing. The activity's data lies over the kind's stored data. One activity per kind: a new start replaces the running one. `build` sets `ios.infoPlist.NSSupportsLiveActivities`. ActivityKit is weak-linked, so apps still run on iOS 15. New error codes `activities_disabled`, `no_activity`, `activity_refused`; other platforms return `unsupported`.
+- Widgets the user configures. `widgets[].options` (`title`, 1 to 20 unique `values`, no `|`) gives iOS and macOS an edit sheet (a generated `AppEnum` and `WidgetConfigurationIntent` per kind) and Android a configure screen (`NshWidgetConfigureActivity`), with the choice kept per placed widget. The chosen value's object in the kind's data lies over the data, and `{option}` holds the value.
+- `list` node: `List(cls, key, item, max = 8)` draws one `item` tree per object in `data[key]`, with `{item.field}` templates. Android 12+ scrolls it (`RemoteCollectionItems`); older Android, iOS and macOS draw the first `max` items.
+- Controls. `widgets.json` `controls` (at most 8): a `toggle` bound to a boolean key of a kind's data, or a `button` that runs an action on it. iOS 18+ gets Control Center and lock-screen controls (`ControlWidgetToggle`, `ControlWidgetButton`); Android gets Quick Settings tiles (`NshTileService$Slot1` to `$Slot8` in the AAR). Controls and widgets redraw together. macOS has none.
+- KDE Plasma. `nsh-widgets plasmoid KIND --group NAME [--plasma 5|6] [--out DIR] [--command PATH]` writes a Plasma applet package whose generic QML renderer (`NshNode.qml`) draws the kind from the app's store. It reads through `nsh-widgets show --format ir` and presses buttons through `nsh-widgets apply`.
+- New commands and formats: `show --format ir` prints the snapshot and data as JSON; `apply KIND ACTION` runs `inc`, `dec` or `toggle` on a store and queues the event for the app.
+- iOS lock-screen circular widgets are centred on the system's `AccessoryWidgetBackground`.
+- `examples/gallery`: Agenda (a list), Weather (options), an Order Live Activity, and two controls (Ship it, Count +1).
+- Verified on the iOS 27 simulator (lock-screen widgets, the Live Activity, options, the list, controls), an Android 17 emulator (the scrolling list, options, tiles) and KDE Plasma 5.27. Plasma 6, macOS rendering of the new features and physical devices are unverified.
+
 ## 0.1.0 (2026-11-24)
 
 First version.
@@ -11,4 +23,4 @@ First version.
 - Installable as an nshm from git: `nsh add github:SuperNSH/widgets@^0.1` brings the Rust module, the AAR and the TSX modules `nsh-widgets`, `nsh-widgets/base`, `nsh-widgets/kit`.
 - 21 shared icons; real gradients on Android (bitmaps behind the content); the root's padding applied the same on every platform; iOS lock-screen families (`circular`, `rectangular`, `inline`) with an `accessory` tree; a desktop store on Linux and Windows named by `configure`.
 - `examples/gallery`: Counter, Dashboard, Focus timer, Tasks, Steps and Icons.
-- Verified on the iOS 27 simulator, an Android 17 (API 37) emulator and a Mac desktop. Lock-screen rendering and physical devices are unverified.
+- Verified on the iOS 27 simulator, an Android 17 (API 37) emulator and a Mac desktop. Lock-screen rendering and physical devices were unverified at this release.

@@ -1,5 +1,5 @@
 import { expect, test } from "nsh/test";
-import { Bars, Button, Col, ICONS, Icon, Link, Progress, Rotate, Row, Spacer, Text, Timer, Toggle, setFont, setTheme, snapshot, tw, defaultTheme } from "../src/base";
+import { Bars, Button, Col, ICONS, Icon, Link, List, Progress, Rotate, Row, Spacer, Text, Timer, Toggle, setFont, setTheme, snapshot, tw, defaultTheme } from "../src/base";
 
 test("resolves sizes, weights, spacing and radius", () => {
   const unknown: string[] = [];
@@ -84,4 +84,10 @@ test("the lock-screen tree and its hide classes", () => {
 test("every shared icon name builds", () => {
   expect(ICONS.length).toBe(21);
   expect(ICONS.map((n) => Icon("", n).name)).toEqual([...ICONS]);
+});
+
+test("lists hold one item tree and a cap", () => {
+  const list = List("gap-2", "events", Text("", "{item.title}"), 5);
+  expect(list).toEqual({ t: "list", style: { gap: 8 }, key: "events", max: 5, children: [{ t: "text", style: {}, text: "{item.title}" }] });
+  expect(List("", "e", Text("", "x")).max).toBe(8);
 });
