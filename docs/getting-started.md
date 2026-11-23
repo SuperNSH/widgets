@@ -33,7 +33,7 @@ cargo install --git https://github.com/SuperNSH/widgets nsh-widgets-cli
 nsh-widgets doctor
 ```
 
-`doctor` checks Xcode, swiftc, `appintentsmetadataprocessor`, the iOS simulator, iOS and macOS SDKs, and `nsh`. On a host other than macOS it checks only `nsh`; the Apple extensions build only on macOS.
+`doctor` checks Xcode, swiftc, `appintentsmetadataprocessor`, the iOS simulator, iOS and macOS SDKs, and `nsh`. With `--app DIR` it also reports your code signing identities and whether a provisioning profile covers the app and its widget extension (`<id>.widgets`) with the App Group, which iOS device packages need; the simulator needs none. On a host other than macOS it checks only `nsh`; the Apple extensions build only on macOS.
 
 ## 3. Write widgets.json
 

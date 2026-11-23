@@ -21,6 +21,7 @@ mod apple;
 mod config;
 mod nshjson;
 mod render;
+mod signing;
 mod source;
 #[cfg(test)]
 mod tests;
@@ -35,7 +36,7 @@ usage:
   nsh-widgets check  [--app DIR]
   nsh-widgets preview [--app DIR] [SOURCE] [--out FILE]
   nsh-widgets show KIND [SOURCE] [--format text|waybar] [--follow]
-  nsh-widgets doctor
+  nsh-widgets doctor [--app DIR]
 
 DIR holds nsh.json and widgets.json (default: the current directory).
 SOURCE is where the app wrote its widgets:
@@ -111,7 +112,7 @@ fn run() -> anyhow::Result<()> {
         "init" => init(&args),
         "build" => build(&args),
         "check" => check(&args.app),
-        "doctor" => doctor(),
+        "doctor" => doctor(&args.app),
         "preview" => source::preview(&args),
         "show" => source::show(&args),
         "" | "help" | "--help" | "-h" => {
@@ -226,7 +227,7 @@ fn check(dir: &Path) -> anyhow::Result<()> {
     }
 }
 
-fn doctor() -> anyhow::Result<()> {
+fn doctor(app: &Path) -> anyhow::Result<()> {
     let mut failed = false;
     let mut probe = |what: &str, cmd: &mut Command| match cmd.output() {
         Ok(o) if o.status.success() => {
@@ -265,5 +266,11 @@ fn doctor() -> anyhow::Result<()> {
         println!("--   Apple extensions build only on macOS; Android needs nothing beyond nsh");
     }
     probe("nsh", Command::new("nsh").arg("--version"));
+    println!(
+        "note packaging widget extensions needs NSH main at or after 5aa56b19 (23 November 2026) or the nightly; the 0.6.0 and 0.6.1 releases cannot"
+    );
+    if cfg!(target_os = "macos") {
+        signing::report(app);
+    }
     if failed { bail!("some checks failed") } else { Ok(()) }
 }

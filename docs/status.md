@@ -49,7 +49,7 @@ The library moved to the repository root and the gallery now imports `nsh-widget
 
 | Command | Result |
 |---|---|
-| `cargo test --workspace` | 9 store tests ([`tests/store.rs`](../tests/store.rs)) and 12 CLI tests ([`tests.rs`](../crates/nsh-widgets-cli/src/tests.rs)) pass. |
+| `cargo test --workspace` | 9 store tests ([`tests/store.rs`](../tests/store.rs)) and 13 CLI tests ([`tests.rs`](../crates/nsh-widgets-cli/src/tests.rs)) pass. |
 | `nsh test` in `packages/nsh-widgets` | 14 tests pass: 11 in [`base.test.ts`](../packages/nsh-widgets/tests/base.test.ts), 3 in [`kit.test.ts`](../packages/nsh-widgets/tests/kit.test.ts). |
 | `scripts/check-aar.sh` | The committed AAR matches its sources; a planted extra drawable made it fail. |
 
@@ -61,7 +61,6 @@ Test output is in `evidence/tests/`. Each suite was seen to fail once against de
 - Widgets the user configures (`AppIntentConfiguration`)
 - Native Linux widget hosts (KDE Plasma QML, GNOME Shell); `show` covers terminals and Waybar
 - Lists that scroll inside a widget
-- Signing help for physical devices in `nsh-widgets doctor`
 - A crates.io and npm release (NSH installs from the git tags)
 - Lock-screen rendering, checked on a device
 - Tests on physical devices

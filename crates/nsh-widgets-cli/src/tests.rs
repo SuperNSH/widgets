@@ -281,3 +281,13 @@ mod render_tests {
         assert!(crate::source::show_text(&w, "xml", 0, String::new()).is_err());
     }
 }
+
+#[test]
+fn profile_identifiers_cover_bundles() {
+    use crate::signing::covers;
+    assert!(covers("TEAM.dev.example.app", "dev.example.app"));
+    assert!(!covers("TEAM.dev.example.app", "dev.example.app.widgets"));
+    assert!(covers("TEAM.dev.example.*", "dev.example.app.widgets"));
+    assert!(covers("TEAM.*", "anything"));
+    assert!(!covers("garbage", "dev.example.app"));
+}

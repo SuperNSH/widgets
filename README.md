@@ -49,7 +49,7 @@ Version 0.1.0. Verified on 23 and 24 November 2026; details and screenshots in [
 - **Linux, Windows**: no system widget host. The app's store lives under the user's data directory; `nsh-widgets show --group NAME --follow` prints a widget for a terminal or, with `--format waybar`, for Waybar.
 - **Physical iPhone and Android devices**: not tested.
 
-Tests: `cargo test --workspace` runs 9 store tests and 12 CLI tests; `nsh test` in `packages/nsh-widgets` runs 14 TS tests. Output is in `docs/evidence/tests/`. Each suite was seen to fail once against deliberately broken code. CI runs format, clippy and tests on Linux, macOS and Windows, cross-checks iOS, Android and web, checks the committed Android AAR against its sources, builds the gallery's widget extensions on macOS, type-checks the gallery with NSH nightly, and runs the TS checks.
+Tests: `cargo test --workspace` runs 9 store tests and 13 CLI tests; `nsh test` in `packages/nsh-widgets` runs 14 TS tests. Output is in `docs/evidence/tests/`. Each suite was seen to fail once against deliberately broken code. CI runs format, clippy and tests on Linux, macOS and Windows, cross-checks iOS, Android and web, checks the committed Android AAR against its sources, builds the gallery's widget extensions on macOS, type-checks the gallery with NSH nightly, and runs the TS checks.
 
 Not in this release:
 
@@ -57,7 +57,6 @@ Not in this release:
 - Widgets the user configures (`AppIntentConfiguration`)
 - Native Linux hosts (KDE Plasma QML, GNOME Shell); `show` covers terminals and Waybar
 - Lists that scroll inside a widget
-- Signing help for physical devices in `nsh-widgets doctor`
 
 ## Requirements
 
