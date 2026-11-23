@@ -8,7 +8,7 @@ Verified on 23 November 2026 with the gallery example ([`examples/gallery`](../e
 |---|---|
 | iOS simulator (iOS 27, Xcode 27.0) | Verified: gallery listing, placement, widget presses, app sees presses. |
 | Android emulator (Android 17, API 37) | Verified: picker listing, widget presses with the app idle, app-side redraw, toggles. |
-| macOS | The gallery was built with `macosAppGroup`, packaged by NSH main with `--sign` (Apple Development identity), installed to `~/Applications`, and `pluginkit` lists `dev.supernsh.widgets.gallery.widgets`. The extension is signed with app-sandbox and the team App Group. Not placed in Notification Center or on the desktop. Rendering unverified. |
+| macOS | Packaged and signed by NSH main (Apple Development identity, team App Group via `macosAppGroup`), installed to `~/Applications`. On the desktop the library's Tasks (checklist rows), Dashboard (gradient banner, progress, bar chart, icons, 9200 steps from the app) and Focus timer (stopwatch, countdown, clock, rotating tip) render with the app's data ([desktop-widgets.png](evidence/macos/desktop-widgets.png); the other NSH widgets in that shot are the older spike app's). Widget buttons on macOS with this library build: untested. |
 | Physical iPhone | Not tested. |
 | Physical Android device | Not tested. |
 | Linux, Windows, web | No widget host. The store works through `NSH_WIDGETS_DIR` only. |

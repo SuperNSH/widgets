@@ -17,7 +17,7 @@ Version 0.1.0, unreleased. Verified on 23 November 2026; details and screenshots
 
 - **iOS 27 simulator**: the gallery example, packaged by NSH main with the extension, shows its kinds in the widget gallery. Two `+1` presses in a placed Counter widget wrote `count: 2` and two events, and the app showed both.
 - **Android 17 (API 37) emulator**: the launcher lists all four kinds. Widget presses changed the counter with the app idle, the app saw them, and an app-side change redrew the widget. A Tasks switch toggled in the widget showed up in the app.
-- **macOS**: the extension builds (swiftc and App Intents metadata). The library build has not been placed on a Mac yet. Unverified.
+- **macOS**: packaged, signed and placed on the desktop; Tasks, Dashboard and Focus timer render with the app's data ([screenshot](docs/evidence/macos/desktop-widgets.png)). Widget buttons on macOS are untested with this build.
 - **Physical iPhone and Android devices**: not tested.
 - **Linux, Windows, web**: no widget host. The store works there only through the `NSH_WIDGETS_DIR` environment variable, and nothing redraws.
 
