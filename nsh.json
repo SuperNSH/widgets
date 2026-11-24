@@ -1,6 +1,6 @@
 {
   "name": "nsh-widgets",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "nsh": "^0.6",
   "exports": {
     "nsh-widgets": "packages/nsh-widgets/src/index.ts",

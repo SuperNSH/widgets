@@ -170,7 +170,7 @@ Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence
 - Tests on physical devices
 - A full GNOME session
 - macOS runs of options and lists
-- A crates.io and npm release (NSH installs from the git tags)
+- An npm release
 
 ## Release
 

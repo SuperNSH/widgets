@@ -28,7 +28,7 @@
   <p>The app describes each widget once, as a tree of primitives written in TSX or JSON, and feeds it data. A generic renderer draws the tree natively: SwiftUI in a WidgetKit extension on iOS and macOS, RemoteViews on Android, QML in a generated KDE Plasma widget, St in a generated GNOME Shell extension or Cinnamon desklet, GTK in a generated window on other Linux desktops. Widget buttons change the data without the app.</p>
   <p>The same trees drive iOS Live Activities. Widgets can let the user pick a value, draw lists, and an app can add iOS 18 Control Center controls and Android Quick Settings tiles bound to a widget's data.</p>
 
-  <h2>Status: 0.4.0</h2>
+  <h2>Status: 0.4.1</h2>
   <table>
     <tr><th>Platform</th><th>State</th></tr>
     <tr><td>iOS 27 simulator</td><td>Verified: home and lock-screen widgets, presses seen by the app, a Live Activity in the Dynamic Island and on the lock screen, an options edit sheet, a list, Control Center controls.</td></tr>
@@ -41,7 +41,7 @@
     <tr><td>X11 (Xfce), layer-shell (sway, KWin, labwc)</td><td>Verified: the same, in a window under the others.</td></tr>
     <tr><td>Windows</td><td>No widget host. <code>nsh-widgets show</code> prints a widget for a terminal or Waybar.</td></tr>
   </table>
-  <p class="muted">Install with <code>nsh add github:SuperNSH/widgets@^0.4</code>. Needs NSH main at or after <code>5aa56b19</code>, or the nightly; the 0.6.0 and 0.6.1 releases cannot package widget extensions.</p>
+  <p class="muted">Install with <code>nsh add nsh-widgets</code>. Needs NSH main at or after <code>5aa56b19</code>, or the nightly; the 0.6.0 and 0.6.1 releases cannot package widget extensions.</p>
 
   <h2>Primitives</h2>
   <p><code>Col</code>, <code>Row</code>, <code>Text</code>, <code>Spacer</code>, <code>Button</code>, <code>Link</code>, <code>Progress</code>, <code>Bars</code>, <code>Icon</code>, <code>Timer</code>, <code>Clock</code>, <code>Toggle</code>, <code>Rotate</code>, <code>List</code>, styled with a Tailwind subset and light and dark theme tokens, with 21 shared icons and gradients on every platform. Buttons run <code>inc:key</code>, <code>dec:key</code>, <code>toggle:key</code> or open a URL.</p>

@@ -23,30 +23,32 @@ Part of the SuperNSH set of optional NSH libraries. Repository: https://github.c
 In the app's directory:
 
 ```sh
-nsh add github:SuperNSH/widgets@^0.4
+nsh add nsh-widgets
 ```
 
 That lists it in `nsh.json` and pins it in `nsh.lock`:
 
 ```json
 "dependencies": {
-  "nsh-widgets": { "github": "SuperNSH/widgets", "version": "^0.2" }
+  "nsh-widgets": "^0.4.1"
 }
 ```
+
+`nsh add github:SuperNSH/widgets` installs the same from the repository's version tags.
 
 The repository root is the nshm: a Rust crate with a `#[native_module]` and an `nsh.json` whose `exports` give TSX the `nsh-widgets`, `nsh-widgets/base` and `nsh-widgets/kit` modules.
 
 The `nsh-widgets` command builds the extensions. Download it from the [releases](https://github.com/SuperNSH/widgets/releases), or:
 
 ```sh
-cargo install --git https://github.com/SuperNSH/widgets nsh-widgets-cli
+cargo install nsh-widgets-cli
 ```
 
 [docs/getting-started.md](docs/getting-started.md) walks through the rest.
 
 ## Status
 
-Version 0.4.0. Verified on 23 and 24 November 2026; details and screenshots in [docs/status.md](docs/status.md).
+Version 0.4.1. Verified on 23 and 24 November 2026; details and screenshots in [docs/status.md](docs/status.md).
 
 - **iOS 27 simulator**: the gallery's kinds list in the widget gallery and draw on the home screen; widget presses reach the app. Lock-screen widgets were placed and drawn ([screenshot](docs/evidence/ios/lock-screen-placed.png)). The Order Live Activity started from the app and showed in the compact and expanded Dynamic Island and as a lock-screen banner, and an update moved it to "On the way". The Weather edit sheet offered Karachi, London and Tokyo, and London drew London's data. The Agenda list drew 12 items. Both controls listed in the Control Center gallery; Count +1 placed there moved the Counter widget to 5.
 - **Android 17 (API 37) emulator**: the Agenda list drew all 12 items and scrolled when the widget was made smaller. Weather's configure screen switched it to Tokyo. The Quick Settings tiles changed Counter and toggled a task, and the app received the presses.

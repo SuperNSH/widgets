@@ -1,13 +1,15 @@
 [package]
 name = "nsh-widgets"
 description = "Home-screen widgets for Native Shell (NSH) apps: one widget tree, drawn by SwiftUI on iOS and macOS and by RemoteViews on Android."
-version = "0.4.0"
+version = "0.4.1"
 edition = "2024"
 license = "MIT"
 repository = "https://github.com/SuperNSH/widgets"
 authors = ["hmziqrs"]
 build = "build.rs"
 readme = "README.md"
+# crates.io finds NSH modules by this keyword.
+keywords = ["nshm", "nsh", "widgets", "widgetkit", "android"]
 # The crate is the repo root (NSH installs an nshm from a repo's root); ship only what builds it.
 include = ["Cargo.toml", "build.rs", "src/**", "swift/**", "android/**", "nsh.json", "packages/nsh-widgets/src/**", "README.md", "LICENSE"]
 
@@ -37,7 +39,7 @@ members = [".", "crates/nsh-widgets-cli"]
 resolver = "3"
 
 [workspace.package]
-version = "0.4.0"
+version = "0.4.1"
 edition = "2024"
 license = "MIT"
 repository = "https://github.com/SuperNSH/widgets"

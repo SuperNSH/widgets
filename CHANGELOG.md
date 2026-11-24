@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1 (2026-11-24)
+
+- The library and the CLI are published on crates.io: `nsh add nsh-widgets` and `cargo install nsh-widgets-cli`. A version tag publishes both once CI has passed on its commit. No code changes since 0.4.0.
+
 ## 0.4.0 (2026-11-24)
 
 - Cinnamon. `nsh-widgets cinnamon KIND --group NAME` writes a desklet that draws the kind's `root` tree on the desktop, with the GNOME renderer. Run on Cinnamon 6.0, 6.4 and 6.6.

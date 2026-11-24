@@ -2,25 +2,25 @@
 
 This adds a home-screen widget to an NSH TSX app. The steps match [`examples/gallery`](../examples/gallery), which is the working reference.
 
-Before you start, check [Requirements](../README.md#requirements): the NSH 0.6.0 and 0.6.1 releases cannot package widgets; you need NSH main at or after `5aa56b19`, or the nightly.
+Before you start, check [Requirements](../README.md#requirements): the NSH 0.6.0 and 0.6.1 releases have no `nsh add` and cannot package widgets; you need NSH main at or after `5aa56b19`, or the nightly.
 
 ## 1. Add the library
 
 In the app's directory:
 
 ```sh
-nsh add github:SuperNSH/widgets@^0.4
+nsh add nsh-widgets
 ```
 
 `nsh.json` then lists it, and `nsh.lock` pins the version:
 
 ```json
 "dependencies": {
-  "nsh-widgets": { "github": "SuperNSH/widgets", "version": "^0.2" }
+  "nsh-widgets": "^0.4.1"
 }
 ```
 
-To work on the library itself, point at a checkout instead: `{ "path": "../widgets" }` (the gallery uses `"../.."`).
+`nsh add github:SuperNSH/widgets` installs the same from the repository's version tags. To work on the library itself, point at a checkout instead: `{ "path": "../widgets" }` (the gallery uses `"../.."`).
 
 The repository root is the nshm. It brings the TSX modules `nsh-widgets`, `nsh-widgets/base` and `nsh-widgets/kit` (its `nsh.json` `exports`), the native module they call (`nsh-widgets/native`), the Swift bridge for Apple targets, and the Android AAR (renderer, layouts, icons, provider slots, action receiver, configure screen, Quick Settings tile slots).
 
@@ -29,7 +29,7 @@ The repository root is the nshm. It brings the TSX modules `nsh-widgets`, `nsh-w
 Download `nsh-widgets` for your machine from the [releases](https://github.com/SuperNSH/widgets/releases), or build it:
 
 ```sh
-cargo install --git https://github.com/SuperNSH/widgets nsh-widgets-cli
+cargo install nsh-widgets-cli
 nsh-widgets doctor
 ```
 

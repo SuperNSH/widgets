@@ -26,4 +26,4 @@ Hard rules for humans and coding agents in this repo.
 
 ## Releasing
 
-Bump the version in `Cargo.toml` (root and `[workspace.package]`), `nsh.json` and `packages/nsh-widgets/package.json` together, add the CHANGELOG entry, then tag `vX.Y.Z`. NSH resolves `"version"` requirements against these tags, and the Release workflow attaches the `nsh-widgets` binaries.
+Bump the version in `Cargo.toml` (root and `[workspace.package]`), `nsh.json` and `packages/nsh-widgets/package.json` together, add the CHANGELOG entry, then tag `vX.Y.Z`. NSH resolves `"version"` requirements against these tags, and the Release workflow attaches the `nsh-widgets` binaries. The Publish crates workflow uploads `nsh-widgets` and `nsh-widgets-cli` to crates.io once CI has passed on the tagged commit; a crates.io version cannot be replaced, so push the tag only when the release is final. To retry: `gh workflow run publish.yml -f tag=vX.Y.Z`.
