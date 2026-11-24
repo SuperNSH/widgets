@@ -445,6 +445,8 @@ fn store_args(dir: &std::path::Path, command: &str, kind: &str) -> crate::Args {
         extra: None,
         plasma: 6,
         exe: None,
+        anchor: None,
+        margin: None,
     }
 }
 

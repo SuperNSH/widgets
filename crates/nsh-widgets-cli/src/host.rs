@@ -8,7 +8,9 @@ use serde_json::{Value, json};
 
 use crate::Args;
 
-const RENDERER: &str = include_str!("../st/renderer.js");
+const COMMON: &str = include_str!("../js/common.js");
+pub const ST: &str = include_str!("../js/st.js");
+pub const GTK: &str = include_str!("../js/gtk.js");
 
 pub struct Host {
     pub kind: String,
@@ -74,22 +76,25 @@ impl Host {
     }
 
     /// Writes the package to `--out`, or to `.nsh-widgets/<host>/<id>`.
-    pub fn write(&self, args: &Args, host: &str, metadata: Value, script: (&str, &str)) -> anyhow::Result<PathBuf> {
+    pub fn write(&self, args: &Args, host: &str, files: &[(&str, String)]) -> anyhow::Result<PathBuf> {
         let out = match &args.out {
             Some(o) => o.clone(),
             None => Path::new(".nsh-widgets").join(host).join(self.uuid()),
         };
         std::fs::create_dir_all(&out)?;
-        let pretty = |v: &Value| serde_json::to_string_pretty(v).map(|s| s + "\n");
-        std::fs::write(out.join("metadata.json"), pretty(&metadata)?)?;
-        std::fs::write(out.join("config.json"), pretty(&self.config())?)?;
-        std::fs::write(out.join(script.0), script.1)?;
+        for (name, text) in files {
+            std::fs::write(out.join(name), text)?;
+        }
         println!("wrote {}", out.display());
         Ok(out)
     }
 }
 
-/// A script with the shared St renderer in it.
-pub fn with_renderer(script: &str) -> String {
-    script.replace("//@RENDERER@\n", RENDERER)
+pub fn pretty(v: &Value) -> String {
+    format!("{v:#}\n")
+}
+
+/// A script with the shared code and `renderer` in it.
+pub fn with_renderer(script: &str, renderer: &str) -> String {
+    script.replace("//@RENDERER@\n", &format!("{COMMON}\n{renderer}"))
 }

@@ -5,7 +5,8 @@
 //!   Android widget library, then writes their entries into `nsh.json`.
 //! - `check`: checks `widgets.json` and that `nsh.json` carries what `build` writes.
 //! - `preview`: draws the widgets as an HTML page, light and dark, in every size.
-//! - `plasmoid`, `gnome`: write a KDE Plasma applet or a GNOME Shell extension for one kind.
+//! - `plasmoid`, `gnome`, `cinnamon`, `window`: write a KDE Plasma applet, a GNOME Shell extension, a Cinnamon
+//!   desklet, or an X11 and layer-shell window for one kind.
 //! - `show`: prints one widget as text or Waybar JSON, for terminals and Linux status bars.
 //! - `doctor`: checks the tools `build` runs.
 
@@ -30,6 +31,7 @@ mod signing;
 mod source;
 #[cfg(test)]
 mod tests;
+mod window;
 
 use config::{App, Config};
 
@@ -45,6 +47,7 @@ usage:
   nsh-widgets plasmoid KIND --group NAME [--plasma 5|6] [--out DIR] [--command PATH]
   nsh-widgets gnome KIND --group NAME [--out DIR] [--command PATH]
   nsh-widgets cinnamon KIND --group NAME [--out DIR] [--command PATH]
+  nsh-widgets window KIND --group NAME [--anchor CORNER] [--margin X,Y] [--out DIR] [--command PATH]
   nsh-widgets doctor [--app DIR]
 
 DIR holds nsh.json and widgets.json (default: the current directory).
@@ -70,6 +73,9 @@ struct Args {
     /// plasmoid: the Plasma version (5 or 6) and the command its QML runs.
     plasma: u32,
     exe: Option<String>,
+    /// window: the screen corner and the distance from it.
+    anchor: Option<String>,
+    margin: Option<String>,
 }
 
 fn parse() -> anyhow::Result<Args> {
@@ -88,6 +94,8 @@ fn parse() -> anyhow::Result<Args> {
         extra: None,
         plasma: 6,
         exe: None,
+        anchor: None,
+        margin: None,
     };
     while let Some(a) = it.next() {
         match a.as_str() {
@@ -108,6 +116,8 @@ fn parse() -> anyhow::Result<Args> {
                     .parse()
                     .context("--plasma needs 5 or 6")?
             }
+            "--anchor" => args.anchor = Some(it.next().context("--anchor needs a corner")?),
+            "--margin" => args.margin = Some(it.next().context("--margin needs X,Y")?),
             "--command" => args.exe = Some(it.next().context("--command needs a path")?),
             other if !other.starts_with("--") && args.kind.is_none() => args.kind = Some(other.to_owned()),
             other if !other.starts_with("--") && args.extra.is_none() => args.extra = Some(other.to_owned()),
@@ -145,6 +155,7 @@ fn run() -> anyhow::Result<()> {
         "plasmoid" => plasma::write(&args),
         "gnome" => gnome::write(&args),
         "cinnamon" => cinnamon::write(&args),
+        "window" => window::write(&args),
         "" | "help" | "--help" | "-h" => {
             println!("{USAGE}");
             Ok(())

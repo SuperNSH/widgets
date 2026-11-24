@@ -84,7 +84,7 @@ export default class NshWidgetExtension extends Extension {
         this._bar.set_child(accessory ? bar.build(accessory) : new St.Label({text: this.metadata.name}));
         const dark = this._settings.get_string('color-scheme') === 'prefer-dark';
         const full = new Renderer(s.data, dark, 'medium', run);
-        this._popup.set_child(card(full, root));
+        this._popup.set_child(full.build(framed(root)));
         this._renderers = [bar, full];
     }
 }

@@ -58,7 +58,7 @@ class NshWidgetDesklet extends Desklet.Desklet {
         const root = this._state?.snapshot?.root;
         const dark = this._interface.get_string('color-scheme') === 'prefer-dark';
         this._renderer = new Renderer(this._state?.data ?? {}, dark, 'medium', a => this._press(a));
-        this._card.set_child(card(this._renderer, root ?? {t: 'text', text: 'Open the app to set up this widget', style: {}}));
+        this._card.set_child(this._renderer.build(framed(root ?? EMPTY)));
     }
 }
 

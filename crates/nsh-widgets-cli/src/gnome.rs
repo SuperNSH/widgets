@@ -19,8 +19,16 @@ pub fn write(args: &Args) -> anyhow::Result<()> {
         "shell-version": SHELL_VERSIONS,
         "url": "https://github.com/SuperNSH/widgets",
     });
-    let js = host::with_renderer(include_str!("../gnome/extension.js"));
-    let out = h.write(args, "gnome", metadata, ("extension.js", &js))?;
+    let js = host::with_renderer(include_str!("../gnome/extension.js"), host::ST);
+    let out = h.write(
+        args,
+        "gnome",
+        &[
+            ("metadata.json", host::pretty(&metadata)),
+            ("config.json", host::pretty(&h.config())),
+            ("extension.js", js),
+        ],
+    )?;
     let dir = format!("~/.local/share/gnome-shell/extensions/{id}");
     println!(
         "install: mkdir -p {dir} && cp -r {}/. {dir}",

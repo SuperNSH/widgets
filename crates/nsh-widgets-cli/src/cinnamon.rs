@@ -14,8 +14,16 @@ pub fn write(args: &Args) -> anyhow::Result<()> {
         // The card draws its own frame.
         "prevent-decorations": true,
     });
-    let js = host::with_renderer(include_str!("../cinnamon/desklet.js"));
-    let out = h.write(args, "cinnamon", metadata, ("desklet.js", &js))?;
+    let js = host::with_renderer(include_str!("../cinnamon/desklet.js"), host::ST);
+    let out = h.write(
+        args,
+        "cinnamon",
+        &[
+            ("metadata.json", host::pretty(&metadata)),
+            ("config.json", host::pretty(&h.config())),
+            ("desklet.js", js),
+        ],
+    )?;
     let dir = format!("~/.local/share/cinnamon/desklets/{id}");
     println!(
         "install: mkdir -p {dir} && cp -r {}/. {dir}",
