@@ -1,6 +1,6 @@
 # Status
 
-Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery`](../examples/gallery)). Screenshots are under [`evidence/`](evidence/). The current version is 0.4.0; its own section is [below](#24-november-2026-040).
+Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery`](../examples/gallery)). Screenshots are under [`evidence/`](evidence/). The current version is 0.4.1, which is 0.4.0 published on crates.io; 0.4.0 has its own section [below](#24-november-2026-040).
 
 ## Summary
 
@@ -174,6 +174,7 @@ Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence
 
 ## Release
 
+- Tag `v0.4.1` on `3f0008f`; CI run https://github.com/SuperNSH/widgets/actions/runs/45392868735 passed all 13 jobs, and the Publish crates run https://github.com/SuperNSH/widgets/actions/runs/45394055839 uploaded `nsh-widgets` and `nsh-widgets-cli` to crates.io. In a blank app, `nsh add nsh-widgets` (an NSH main build) installed 0.4.1 from crates.io and `nsh check` passed; `cargo install nsh-widgets-cli` installed a command that runs.
 - Tag `v0.4.0` on `d07a5f3`; CI run https://github.com/SuperNSH/widgets/actions/runs/45342080240 passed all 12 jobs. In a blank app, `nsh add github:SuperNSH/widgets@^0.4` resolved to 0.4.0 at that commit and `nsh check` passed. The released x86_64 Linux `nsh-widgets` (SHA-256 checked) wrote a Cinnamon desklet and a window, and the window ran.
 - Tag `v0.3.0` on `d1a4d28`; CI run https://github.com/SuperNSH/widgets/actions/runs/45334884052 passed all 12 jobs. In a blank app, `nsh add github:SuperNSH/widgets@^0.3` resolved to 0.3.0 at that commit and `nsh check` passed. The released `nsh-widgets` for arm64 macOS and x86_64 Linux (SHA-256 checked) each wrote a GNOME extension.
 - Tag `v0.2.0` on `1372cce`; CI run https://github.com/SuperNSH/widgets/actions/runs/45327392050 passed all 12 jobs. In a blank app, `nsh add github:SuperNSH/widgets@^0.2` resolved to 0.2.0 at that commit, `nsh check` passed, and the released `nsh-widgets` (aarch64 macOS, SHA-256 checked) built a kind with options, a list, a Live Activity and a control; `nsh package` built the iOS simulator app and the Android APK.
