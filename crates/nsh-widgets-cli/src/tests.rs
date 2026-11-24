@@ -450,8 +450,6 @@ fn store_args(dir: &std::path::Path, command: &str, kind: &str) -> crate::Args {
 
 #[test]
 fn gnome_extensions_have_a_valid_id_and_run_no_shell() {
-    let id = crate::gnome::uuid("dev.example app/$(x)", "My_Steps");
-    assert_eq!(id, "dev.example-app---x-.my_steps@widgets.supernsh.dev");
     let dir = tempfile::tempdir().unwrap();
     let mut args = store_args(dir.path(), "gnome", "Steps");
     args.group = Some("dev.example.app".into());
@@ -470,10 +468,16 @@ fn gnome_extensions_have_a_valid_id_and_run_no_shell() {
         json!({ "kind": "Steps", "command": "/opt/my tools/nsh-widgets", "source": ["--group", "dev.example.app"] })
     );
     let js = read("extension.js");
-    assert!(js.contains("Gio.Subprocess.new([this._config.command, ...args]") && !js.contains("spawn_command_line"));
+    assert!(js.contains("Gio.Subprocess.new([command, ...args]") && !js.contains("spawn_command_line"));
     assert!(
         js.contains("if (key === this._last) return"),
         "unchanged data must not rebuild the tree"
+    );
+    args.group = Some("dev.example app/$(x)".into());
+    args.kind = Some("My_Steps".into());
+    assert_eq!(
+        crate::host::Host::read(&args, "gnome").unwrap().uuid(),
+        "dev.example-app---x-.my_steps@widgets.supernsh.dev"
     );
     args.kind = Some("../x".into());
     assert!(crate::gnome::write(&args).is_err());

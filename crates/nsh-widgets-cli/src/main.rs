@@ -19,8 +19,10 @@ use serde_json::Value;
 
 mod android;
 mod apple;
+mod cinnamon;
 mod config;
 mod gnome;
+mod host;
 mod nshjson;
 mod plasma;
 mod render;
@@ -42,6 +44,7 @@ usage:
   nsh-widgets apply KIND ACTION [SOURCE]
   nsh-widgets plasmoid KIND --group NAME [--plasma 5|6] [--out DIR] [--command PATH]
   nsh-widgets gnome KIND --group NAME [--out DIR] [--command PATH]
+  nsh-widgets cinnamon KIND --group NAME [--out DIR] [--command PATH]
   nsh-widgets doctor [--app DIR]
 
 DIR holds nsh.json and widgets.json (default: the current directory).
@@ -141,6 +144,7 @@ fn run() -> anyhow::Result<()> {
         "apply" => source::apply(&args, args.extra.as_deref().unwrap_or("")),
         "plasmoid" => plasma::write(&args),
         "gnome" => gnome::write(&args),
+        "cinnamon" => cinnamon::write(&args),
         "" | "help" | "--help" | "-h" => {
             println!("{USAGE}");
             Ok(())
