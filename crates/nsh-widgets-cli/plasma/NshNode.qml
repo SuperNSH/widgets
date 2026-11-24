@@ -237,7 +237,8 @@ Item {
             // Plasma scrolls the list, as Android does, through the first `max` items.
             clip: true
             spacing: node.st.gap || 0
-            implicitHeight: Math.min(contentHeight, 400)
+            // A list must not force the widget to grow to all its items: it fills what is left and scrolls.
+            implicitHeight: Math.min(contentHeight, 110)
             implicitWidth: 40
             model: (node.vals[node.n.key] || []).slice(0, node.n.max || 8)
             delegate: Loader {
