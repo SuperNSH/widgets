@@ -14,7 +14,7 @@ class NshWidgetDesklet extends Desklet.Desklet {
         this._cancel = new Gio.Cancellable();
         this._interface = new Gio.Settings({schema_id: 'org.x.apps.portal'});
         this._themeId = this._interface.connect('changed::color-scheme', () => this._draw());
-        this._card = new St.Bin({style: 'width: 320px;'});
+        this._card = new St.Bin({style: 'width: 320px;', x_fill: true});
         this.setHeader(metadata.name);
         this.setContent(this._card);
         let n = 0;

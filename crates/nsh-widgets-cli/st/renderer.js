@@ -12,6 +12,9 @@ function box(vertical, props) {
     b.layout_manager.orientation = vertical ? Clutter.Orientation.VERTICAL : Clutter.Orientation.HORIZONTAL;
     return b;
 }
+/** Cinnamon's St.Bin aligns its child with x_align and x_fill; GNOME's aligns itself, as every actor does. */
+const OLD_BIN = 'x_fill' in St.Bin.prototype;
+const START = OLD_BIN ? {x_align: St.Align.START, x_fill: false} : {x_align: Clutter.ActorAlign.START};
 const num = (v, d) => (Number.isFinite(v) ? v : d);
 
 class Renderer {
@@ -54,9 +57,12 @@ class Renderer {
     }
 
     pressable(child, node, action) {
-        const b = new St.Button({child, style: this.css(node, true), x_align: Clutter.ActorAlign.START, can_focus: true});
+        const b = new St.Button({child, style: this.css(node, true), can_focus: true, ...START});
         b.connect('clicked', () => this.run(action));
-        return b;
+        if (!OLD_BIN) return b;
+        const row = box(false, {}); // or a column would stretch it
+        row.add_child(b);
+        return row;
     }
 
     /** The actor for `node`, or null when it is hidden or unknown. */
@@ -119,7 +125,7 @@ class Renderer {
             return this.pressable(row, {}, node.action ?? `toggle:${node.key}`);
         }
         case 'rotate': {
-            const kids = node.children ?? [], bin = new St.Bin({x_align: Clutter.ActorAlign.START});
+            const kids = node.children ?? [], bin = new St.Bin(START);
             let shown = -1, own = []; // the shown child's ticks, dropped with it
             if (kids.length) {
                 this.tick(now => {
