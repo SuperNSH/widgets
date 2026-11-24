@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 (2026-11-24)
+
+- KDE Plasma: in a panel the widget drew its full form, and once fixed its templates stayed unfilled. It now draws the `accessory` tree, follows its data, and opens the full widget when clicked. Plasmoids written by 0.2.0 need `nsh-widgets plasmoid` run again.
+
 ## 0.2.0 (2026-11-24)
 
 - Live Activities on iOS. `widgets.json` `activities` lists the kinds that can run as one. `Widgets.startActivity(kind, data)`, `updateActivity`, `endActivity` in TS; `start_activity`, `update_activity`, `end_activity` in Rust. The lock-screen banner and the expanded Dynamic Island draw the kind's `root` tree; the compact and minimal Dynamic Island draw its `accessory` tree, a row's first child leading and the rest trailing. The activity's data lies over the kind's stored data. One activity per kind: a new start replaces the running one. `build` sets `ios.infoPlist.NSSupportsLiveActivities`. ActivityKit is weak-linked, so apps still run on iOS 15. New error codes `activities_disabled`, `no_activity`, `activity_refused`; other platforms return `unsupported`.
@@ -10,7 +14,7 @@
 - New commands and formats: `show --format ir` prints the snapshot and data as JSON; `apply KIND ACTION` runs `inc`, `dec` or `toggle` on a store and queues the event for the app.
 - iOS lock-screen circular widgets are centred on the system's `AccessoryWidgetBackground`.
 - `examples/gallery`: Agenda (a list), Weather (options), an Order Live Activity, and two controls (Ship it, Count +1).
-- Verified on the iOS 27 simulator (lock-screen widgets, the Live Activity, options, the list, controls), an Android 17 emulator (the scrolling list, options, tiles) and KDE Plasma 5.27 and 6.3. macOS rendering of the new features, the KDE panel form and physical devices are unverified.
+- Verified on the iOS 27 simulator (lock-screen widgets, the Live Activity, options, the list, controls), an Android 17 emulator (the scrolling list, options, tiles) and KDE Plasma 5.27 and 6.3. macOS rendering of the new features, and physical devices are unverified.
 
 ## 0.1.0 (2026-11-24)
 

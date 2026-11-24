@@ -60,7 +60,7 @@ The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 
 
 ## KDE Plasma
 
-`nsh-widgets plasmoid` writes a Plasma applet whose QML renderer reads the store through `nsh-widgets show --format ir` every two seconds and runs presses through `nsh-widgets apply`. Seen on Plasma 5.27 and 6.3 in `plasmoidviewer`; the panel form has not been seen.
+`nsh-widgets plasmoid` writes a Plasma applet whose QML renderer reads the store through `nsh-widgets show --format ir` every two seconds and runs presses through `nsh-widgets apply`. Seen on Plasma 5.27 and 6.3 in `plasmoidviewer`; in a panel it draws the `accessory` tree (since 0.2.1).
 
 | Feature | KDE Plasma |
 |---|---|

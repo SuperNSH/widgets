@@ -1,6 +1,6 @@
 # Status
 
-Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery`](../examples/gallery)). Screenshots are under [`evidence/`](evidence/). The current version is 0.2.0; its own section is [below](#24-november-2026-020).
+Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery`](../examples/gallery)). Screenshots are under [`evidence/`](evidence/). The current version is 0.2.1; its own section is [below](#24-november-2026-020).
 
 ## Summary
 
@@ -82,7 +82,7 @@ The Ubuntu machine's clock in these screenshots reads 23 November, 21:22 to 21:2
 ### Not verified in 0.2.0
 
 - macOS rendering of options and lists. The Mac extension builds with the generated option intents; nothing was placed on a Mac.
-- The KDE panel form (the `accessory` tree). Only the desktop form was seen, in `plasmoidviewer`, not in a full Plasma session.
+- A full Plasma session: both KDE forms were seen only in `plasmoidviewer`. The panel form was broken in 0.2.0; in 0.2.1, with a hand-written Steps tree, it drew the `accessory` tree and followed the data on Plasma 5.27 and 6.3, and on 5.27 a click opened the full widget ([panel-opened.png](evidence/kde/panel-opened.png); the viewer paints no panel behind it, so the text is dark on black).
 - GNOME: no host. `show` and Waybar cover it.
 - Physical iPhone and Android devices: none was connected, and `nsh-widgets doctor --app` on the gallery reported no provisioning profiles for the app or its extension.
 
@@ -100,7 +100,7 @@ Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence
 
 - A GNOME Shell host and a Windows widget host; `show` covers terminals and Waybar
 - Tests on physical devices
-- The KDE panel form
+- A full Plasma session
 - macOS runs of options and lists
 - A crates.io and npm release (NSH installs from the git tags)
 

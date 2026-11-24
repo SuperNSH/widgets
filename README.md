@@ -43,11 +43,11 @@ cargo install --git https://github.com/SuperNSH/widgets nsh-widgets-cli
 
 ## Status
 
-Version 0.2.0. Verified on 23 and 24 November 2026; details and screenshots in [docs/status.md](docs/status.md).
+Version 0.2.1. Verified on 23 and 24 November 2026; details and screenshots in [docs/status.md](docs/status.md).
 
 - **iOS 27 simulator**: the gallery's kinds list in the widget gallery and draw on the home screen; widget presses reach the app. Lock-screen widgets were placed and drawn ([screenshot](docs/evidence/ios/lock-screen-placed.png)). The Order Live Activity started from the app and showed in the compact and expanded Dynamic Island and as a lock-screen banner, and an update moved it to "On the way". The Weather edit sheet offered Karachi, London and Tokyo, and London drew London's data. The Agenda list drew 12 items. Both controls listed in the Control Center gallery; Count +1 placed there moved the Counter widget to 5.
 - **Android 17 (API 37) emulator**: the Agenda list drew all 12 items and scrolled when the widget was made smaller. Weather's configure screen switched it to Tokyo. The Quick Settings tiles changed Counter and toggled a task, and the app received the presses.
-- **KDE Plasma 5.27 and 6.3** (Ubuntu 24.04 and Debian 13, `plasmoidviewer`): Dashboard, Tasks and Agenda drew from the app's store; a button raised the streak and queued an event, a task toggled, the list scrolled and kept its place. The panel form has not been seen.
+- **KDE Plasma 5.27 and 6.3** (Ubuntu 24.04 and Debian 13, `plasmoidviewer`): Dashboard, Tasks and Agenda drew from the app's store; a button raised the streak and queued an event, a task toggled, the list scrolled and kept its place. In a panel it draws the small tree (fixed in 0.2.1).
 - **macOS**: 0.1.0's Tasks, Dashboard and Focus timer render on the desktop ([screenshot](docs/evidence/macos/tasks-dashboard.png)). The 0.2.0 extension builds with options; their rendering on a Mac is unverified.
 - **GNOME, other Linux desktops, Windows**: no widget host. `nsh-widgets show --group NAME --follow` prints a widget for a terminal or, with `--format waybar`, for Waybar.
 - **Physical iPhone and Android devices**: not tested.
