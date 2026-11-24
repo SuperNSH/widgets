@@ -16,6 +16,12 @@ const GLYPHS = {
     sun: '☀', moon: '☾', drop: '💧', music: '♪',
 };
 const WEIGHTS = {medium: 500, semibold: 600, bold: 700};
+/** A row or column: St.BoxLayout's own property for it differs between GNOME 45 and 51, its layout manager's does not. */
+function box(vertical, props) {
+    const b = new St.BoxLayout(props);
+    b.layout_manager.orientation = vertical ? Clutter.Orientation.VERTICAL : Clutter.Orientation.HORIZONTAL;
+    return b;
+}
 const num = (v, d) => (Number.isFinite(v) ? v : d);
 
 class Renderer {
@@ -71,12 +77,12 @@ class Renderer {
         case 'col':
         case 'row': {
             const row = node.t === 'row';
-            const box = new St.BoxLayout({vertical: !row, style: this.css(node, false), x_expand: !inRow, y_expand: s.grow === true});
+            const b = box(!row, {style: this.css(node, false), x_expand: !inRow, y_expand: s.grow === true});
             for (const c of node.children ?? []) {
                 const a = this.build(c, data, row);
-                if (a) box.add_child(a);
+                if (a) b.add_child(a);
             }
-            return box;
+            return b;
         }
         case 'text': return this.label(node, this.fill(node.text, data));
         case 'spacer': return new St.Widget({x_expand: inRow, y_expand: !inRow});
@@ -94,13 +100,13 @@ class Renderer {
         case 'bars': {
             const values = (Array.isArray(data[node.key]) ? data[node.key] : []).filter(Number.isFinite);
             const top = Math.max(1, ...values), h = num(s.height, 48);
-            const box = new St.BoxLayout({x_expand: true, height: h, style: `spacing: ${num(s.gap, 4)}px;`});
+            const bars = new St.BoxLayout({x_expand: true, height: h, style: `spacing: ${num(s.gap, 4)}px;`});
             for (const v of values) {
-                box.add_child(new St.Widget({x_expand: true, y_align: Clutter.ActorAlign.END, y_expand: true,
+                bars.add_child(new St.Widget({x_expand: true, y_align: Clutter.ActorAlign.END, y_expand: true,
                     height: Math.max(2, Math.round(h * v / top)),
                     style: `border-radius: 3px; background-color: ${this.color(s.fg) ?? '#2563eb'};`}));
             }
-            return box;
+            return bars;
         }
         case 'timer':
         case 'clock': {
@@ -143,17 +149,17 @@ class Renderer {
             return bin;
         }
         case 'list': {
-            const box = new St.BoxLayout({vertical: true, x_expand: true, style: `spacing: ${num(s.gap, 0)}px;`});
+            const rows = box(true, {x_expand: true, style: `spacing: ${num(s.gap, 0)}px;`});
             const items = Array.isArray(data[node.key]) ? data[node.key] : [];
             for (const item of items.slice(0, num(node.max, 8))) {
                 const d = {...data};
                 for (const k in item) d[`item.${k}`] = item[k];
                 const a = this.build(node.children?.[0], d);
-                if (a) box.add_child(a);
+                if (a) rows.add_child(a);
             }
             const view = new St.ScrollView({x_expand: true, style: 'max-height: 160px;', hscrollbar_policy: St.PolicyType.NEVER});
-            if (view.set_child) view.set_child(box);
-            else view.add_actor(box);
+            if (view.set_child) view.set_child(rows);
+            else view.add_actor(rows);
             return view;
         }
         default: return null;
