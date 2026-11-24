@@ -77,7 +77,7 @@ pub fn metadata(version: u32, id: &str, name: &str, description: &str) -> serde_
 }
 
 /// A shell word: plain, or single-quoted.
-fn shell_word(s: &str) -> String {
+pub fn shell_word(s: &str) -> String {
     if !s.is_empty() && s.chars().all(|c| c.is_ascii_alphanumeric() || "/._-+:@".contains(c)) {
         s.to_owned()
     } else {
