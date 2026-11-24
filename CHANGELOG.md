@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 (2026-11-24)
+
+- Cinnamon. `nsh-widgets cinnamon KIND --group NAME` writes a desklet that draws the kind's `root` tree on the desktop, with the GNOME renderer. Run on Cinnamon 6.0, 6.4 and 6.6.
+- X11 and layer-shell. `nsh-widgets window KIND --group NAME [--anchor CORNER] [--margin X,Y]` writes a GJS script (GTK 3) that keeps a window under the others: a layer-shell surface on Wayland compositors that have the protocol, a kept-below window on X11. Run on Xfce (X11) and sway.
+- KDE Plasma 5.27 checked in a full session: desktop and panel forms, presses, the panel popup, Breeze Dark.
+
 ## 0.3.0 (2026-11-24)
 
 - GNOME Shell. `nsh-widgets gnome KIND --group NAME [--out DIR] [--command PATH]` writes a GNOME Shell extension: the kind's `accessory` tree in the top bar and its `root` tree in the popup, with buttons, toggles, scrolling lists, timers, and light and dark. It reads through `nsh-widgets show --format ir` and presses through `nsh-widgets apply`, with no shell in between. Run on GNOME Shell 45 to 51 (headless; 48.7 also nested). `scripts/gnome-probe` repeats the check.

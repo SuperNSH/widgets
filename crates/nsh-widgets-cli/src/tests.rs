@@ -490,6 +490,39 @@ fn gnome_extensions_have_a_valid_id_and_run_no_shell() {
 }
 
 #[test]
+fn cinnamon_desklets_and_windows_carry_their_renderer() {
+    let dir = tempfile::tempdir().unwrap();
+    let out = dir.path().join("out");
+    let mut args = store_args(dir.path(), "cinnamon", "Steps");
+    args.out = Some(out.clone());
+    args.exe = Some("nsh-widgets".into());
+    let read = |f: &str| std::fs::read_to_string(out.join(f)).unwrap();
+    crate::cinnamon::write(&args).unwrap();
+    let desklet = read("desklet.js");
+    assert!(desklet.contains("class Base") && desklet.contains("new St.ScrollView") && !desklet.contains("@RENDERER@"));
+    let meta: serde_json::Value = serde_json::from_str(&read("metadata.json")).unwrap();
+    assert_eq!(meta["prevent-decorations"], true);
+    args.anchor = Some("bottom-left".into());
+    args.margin = Some("12, 40".into());
+    crate::window::write(&args).unwrap();
+    let window = read("window.js");
+    assert!(
+        window.contains("class Base") && window.contains("new Gtk.ScrolledWindow") && !window.contains("@RENDERER@")
+    );
+    let config: serde_json::Value = serde_json::from_str(&read("config.json")).unwrap();
+    assert_eq!(config["anchor"], "bottom-left");
+    assert_eq!(config["margin"], json!([12, 40]));
+    assert_eq!(config["source"][0], "--dir");
+    for bad in ["1", "1,2,3", "a,b", ""] {
+        args.margin = Some(bad.into());
+        assert!(crate::window::write(&args).is_err(), "{bad:?}");
+    }
+    args.margin = None;
+    args.anchor = Some("middle".into());
+    assert!(crate::window::write(&args).is_err());
+}
+
+#[test]
 fn apply_runs_actions_on_a_store_and_queues_events() {
     let dir = tempfile::tempdir().unwrap();
     let args = store_args(dir.path(), "apply", "Tasks");

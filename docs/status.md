@@ -1,6 +1,6 @@
 # Status
 
-Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery`](../examples/gallery)). Screenshots are under [`evidence/`](evidence/). The current version is 0.3.0; its own section is [below](#24-november-2026-030).
+Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery`](../examples/gallery)). Screenshots are under [`evidence/`](evidence/). The current version is 0.4.0; its own section is [below](#24-november-2026-040).
 
 ## Summary
 
@@ -13,12 +13,14 @@ Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery
 | Android emulator (Android 17, API 37) | Verified: picker listing, widget presses with the app idle, app-side redraw, toggles, bitmap gradients on the root and on an inner row, the 21 icons. In 0.2.0: the scrolling list, the configure screen, Quick Settings tiles. |
 | macOS | Packaged and signed by NSH main (Apple Development identity, team App Group via `macosAppGroup`), installed to `~/Applications`. On the desktop the library's Tasks (checklist rows), Dashboard (gradient banner, progress, bar chart, icons, 9200 steps from the app) and Focus timer (stopwatch, countdown, clock, rotating tip) render with the app's data ([tasks-dashboard.png](evidence/macos/tasks-dashboard.png), [focus-timer.png](evidence/macos/focus-timer.png)). Pressing a Tasks row on the desktop toggled it without the app (reported by the user on 23 November 2026; no screenshot). |
 | macOS, 0.2.0 features | The extension builds with options. Options and lists have not been seen on a Mac: unverified. |
-| KDE Plasma 5.27 | Verified in 0.2.0 in `plasmoidviewer` on Ubuntu 24.04: Dashboard, a button press, Tasks toggled, the Agenda list scrolled. |
+| KDE Plasma 5.27 | Verified in 0.4.0 in a full session, desktop and panel forms; in 0.2.0 in `plasmoidviewer` on Ubuntu 24.04: Dashboard, a button press, Tasks toggled, the Agenda list scrolled. |
 | KDE Plasma 6.3 | Verified in 0.2.0 in `plasmoidviewer` on Debian 13: Dashboard and a button press (streak 13 to 14, [plasma6-dashboard-after-button.jpg](evidence/kde/plasma6-dashboard-after-button.jpg)), a task toggled ([plasma6-tasks-toggled.jpg](evidence/kde/plasma6-tasks-toggled.jpg)), and the Agenda list scrolled and still in place seven seconds later ([plasma6-agenda-scrolled.jpg](evidence/kde/plasma6-agenda-scrolled.jpg)). This run found two bugs, fixed before release and rechecked on Plasma 5.27: a list grew the widget instead of scrolling, and each two-second read reset its scroll. |
 | Physical iPhone | Not tested. |
 | Physical Android device | Not tested. |
 | GNOME Shell 45 to 51 | Verified in 0.3.0: 48.7 nested with a pointer, all seven headless through a probe: drawing, a button press, a toggle, the Agenda list scrolled, light and dark, timers, disable and enable. A full session is unverified. |
-| Other Linux desktops, Windows | No widget host. `nsh-widgets show` draws a widget as text or Waybar JSON; checked on macOS against the simulator's store ([show.txt](evidence/tests/show.txt)). The Linux and Windows store paths are covered by code review only. |
+| Cinnamon 6.0, 6.4, 6.6 | Verified in 0.4.0: drawing, a press, a toggle, a scrolled list, dark, removed and added back. |
+| X11 (Xfce 4.18), layer-shell (sway 1.9) | Verified in 0.4.0: the same; the window stays under others. Other compositors are unverified. |
+| Windows, other Wayland compositors | No widget host. `nsh-widgets show` draws a widget as text or Waybar JSON; checked on macOS against the simulator's store ([show.txt](evidence/tests/show.txt)). The Linux and Windows store paths are covered by code review only. |
 | Web | No store. |
 
 ## iOS 27 simulator
@@ -115,6 +117,36 @@ The Ubuntu machine's clock in these screenshots reads 23 November, 21:22 to 21:2
 - A full GNOME session: every run was nested or headless, and only 48.7 was pressed with a pointer.
 - The Counter, Focus timer, Icons and Weather kinds on GNOME: the store did not hold them.
 
+## 24 November 2026: 0.4.0
+
+The store and the hand-written Kinds tree are 0.3.0's. Presses here are a pointer's (`xdotool`), except GNOME's.
+
+### Cinnamon
+
+- 6.0.4 (Ubuntu 24.04): five desklets drew; "+1 day" moved the streak from 15 to 16 in the store and the desklet; a task toggled; Agenda scrolled and kept its place for 7 seconds; `prefer-dark` redrew them ([pressed-and-dark.png](evidence/cinnamon/pressed-and-dark.png)); `open:` with no handler logged a line; the desklets went away when removed and drew again when added back.
+- 6.4.10 (Debian 13), 6.4.13 (Ubuntu 26.04) and 6.6.9 (Ubuntu 26.10), top to bottom in [versions-6.4-6.6.png](evidence/cinnamon/versions-6.4-6.6.png): the same, with no desklet error in the log. On 6.4.10 the click fell on the row above the one aimed at, and that row toggled.
+- Cinnamon ran on a virtual X display, not from a login screen.
+
+### X11 and layer-shell
+
+- X11, Xfce 4.18 on the cloud machine's own desktop: five windows drew; the press, the toggle, the scroll and dark as above ([xfce-pressed-and-dark.png](evidence/window/xfce-pressed-and-dark.png)); a terminal raised over one covered it ([xfce-under-a-window.png](evidence/window/xfce-under-a-window.png)).
+- Layer-shell, sway 1.9 nested on X11: four surfaces, the same checks ([sway-pressed-and-dark.png](evidence/window/sway-pressed-and-dark.png)).
+- weston, which has no layer-shell: the script said so and exited with 1.
+
+### KDE Plasma 5.27, full session
+
+`startplasma-x11` on a virtual X display. The desktop form (Dashboard, Tasks, Agenda) and the panel form (Steps) drew; the press, the toggle and the scroll as above ([session-pressed.png](evidence/kde/session-pressed.png)); clicking the panel opened the full widget ([session-panel-opened.png](evidence/kde/session-panel-opened.png)); Breeze Dark redrew them ([session-dark.png](evidence/kde/session-dark.png)); removing them left the shell running.
+
+### GNOME
+
+The renderer was split into shared files, so the probe ran again on all seven versions, with the same results.
+
+### Not verified in 0.4.0
+
+- Hyprland, COSMIC, KWin and other layer-shell compositors; X11 desktops other than Xfce.
+- Plasma 6 in a full session (6.3 only in `plasmoidviewer`), and a full GNOME session.
+- Several monitors, and fractional scaling.
+
 ## Tests
 
 | Command | Result |
@@ -123,13 +155,13 @@ The Ubuntu machine's clock in these screenshots reads 23 November, 21:22 to 21:2
 | `nsh test` in `packages/nsh-widgets` | 15 tests pass: 12 in [`base.test.ts`](../packages/nsh-widgets/tests/base.test.ts), 3 in [`kit.test.ts`](../packages/nsh-widgets/tests/kit.test.ts). |
 | `scripts/check-aar.sh` | The committed AAR matches its sources; a planted extra drawable made it fail, and so did an edit to a Java file (it compares a hash of the sources). |
 
-Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence/tests/nsh-test.txt). Each suite was seen to fail once against deliberately broken code: in 0.1.0 the action inbox, the `nsh.json` writer, the action check in `base.ts` and the toggle in the text renderer; in 0.2.0 removing `list` from the store's node types, dropping the tile entries from the generated Android manifest, and one break for each other new test ([fail-once-0.2.0.txt](evidence/tests/fail-once-0.2.0.txt)). The 0.3.0 test was seen to fail five ways ([fail-once-0.3.0.txt](evidence/tests/fail-once-0.3.0.txt)). The Swift, Java, QML and GNOME renderers are covered only by the simulator, emulator, Plasma and GNOME runs above. CI is defined in `.github/workflows/ci.yml`.
+Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence/tests/nsh-test.txt). Each suite was seen to fail once against deliberately broken code: in 0.1.0 the action inbox, the `nsh.json` writer, the action check in `base.ts` and the toggle in the text renderer; in 0.2.0 removing `list` from the store's node types, dropping the tile entries from the generated Android manifest, and one break for each other new test ([fail-once-0.2.0.txt](evidence/tests/fail-once-0.2.0.txt)). The 0.4.0 test was seen to fail four ways ([fail-once-0.4.0.txt](evidence/tests/fail-once-0.4.0.txt)) and the 0.3.0 test five ([fail-once-0.3.0.txt](evidence/tests/fail-once-0.3.0.txt)). The Swift, Java, QML, St and GTK renderers are covered only by the runs above. CI is defined in `.github/workflows/ci.yml`.
 
 ## Not done
 
-- A Windows widget host, and the other Linux hosts in the plan (Cinnamon, COSMIC, layer-shell, X11); `show` covers terminals and Waybar
+- A Windows widget host and a COSMIC applet; `show` covers terminals and Waybar
 - Tests on physical devices
-- A full Plasma session and a full GNOME session
+- A full Plasma 6 session and a full GNOME session
 - macOS runs of options and lists
 - A crates.io and npm release (NSH installs from the git tags)
 

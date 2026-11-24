@@ -9,7 +9,7 @@ Before you start, check [Requirements](../README.md#requirements): the NSH 0.6.0
 In the app's directory:
 
 ```sh
-nsh add github:SuperNSH/widgets@^0.3
+nsh add github:SuperNSH/widgets@^0.4
 ```
 
 `nsh.json` then lists it, and `nsh.lock` pins the version:
@@ -286,7 +286,7 @@ A press writes `data.json`, appends an event to `actions.jsonl` like a widget bu
 
 ## Linux and Windows
 
-The app keeps a store on the desktop once it names it. KDE Plasma can draw it with a generated plasmoid ([below](#kde-plasma)) and GNOME Shell with a generated extension ([below](#gnome-shell)); Windows has no widget host for it, and `nsh-widgets show` prints it instead.
+The app keeps a store on the desktop once it names it. KDE Plasma can draw it with a generated plasmoid ([below](#kde-plasma)) GNOME Shell with a generated extension ([below](#gnome-shell)), Cinnamon with a desklet ([below](#cinnamon)) and other desktops with a window ([below](#x11-and-layer-shell)); Windows has no widget host for it, and `nsh-widgets show` prints it instead.
 
 Naming the store:
 
@@ -358,6 +358,30 @@ It prints the two steps that follow: copying the directory to `~/.local/share/gn
 The bar draws the kind's `accessory` tree, or its name when it has none; the popup draws the `root` tree. The extension runs `nsh-widgets show KIND --group NAME --format ir` every two seconds and redraws when something changed; a press runs `nsh-widgets apply`. Both run as a program with arguments, with no shell. Light or dark follows GNOME's Dark Style.
 
 The metadata lists GNOME 45 to 51, and each was run ([status.md](status.md)). GNOME turns an extension off on a version its metadata does not list, so a later GNOME needs a newer `nsh-widgets`. Icons such as the flame are emoji and need an emoji font on the machine.
+
+## Cinnamon
+
+```sh
+nsh-widgets cinnamon Dashboard --group dev.example.app --out dashboard
+```
+
+It prints the step that follows: copying the directory to `~/.local/share/cinnamon/desklets/<id>`. Then add it from System Settings > Desklets. It takes the options `nsh-widgets gnome` takes. The desklet draws the `root` tree, 320 pixels wide, and follows Cinnamon's dark mode (`org.x.apps.portal color-scheme`).
+
+## X11 and layer-shell
+
+```sh
+nsh-widgets window Dashboard --group dev.example.app --anchor top-right --margin 24,24 --out dashboard
+gjs dashboard/window.js
+```
+
+The script draws the `root` tree, 340 pixels wide, in a window under the others. On Wayland it is a layer-shell surface on the bottom layer and needs gtk-layer-shell (`gir1.2-gtklayershell-0.1` on Debian and Ubuntu); on a compositor without layer-shell, such as GNOME's, it says so and exits. On X11 it is a borderless window that stays below the others and on every workspace. Start it with the session: an autostart entry, or `exec` in the compositor's config.
+
+| Option | Meaning |
+|---|---|
+| `--anchor CORNER` | `top-left`, `top-right` (default), `bottom-left` or `bottom-right` |
+| `--margin X,Y` | Pixels from that corner. Default `24,24`. |
+
+The other options are `nsh-widgets gnome`'s. It is dark when `org.gnome.desktop.interface color-scheme` is `prefer-dark`, GTK prefers dark, or the GTK theme's name ends in `-dark`.
 
 ## Platform notes
 

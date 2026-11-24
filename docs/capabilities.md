@@ -1,6 +1,6 @@
 # Capabilities by platform
 
-One tree, four native renderers. iOS and macOS share the SwiftUI renderer ([`NshWidgets.swift`](../crates/nsh-widgets-cli/renderer/NshWidgets.swift), with [`NshActivities.swift`](../crates/nsh-widgets-cli/renderer/NshActivities.swift) for Live Activities); Android has the RemoteViews renderer ([`NshWidgets.java`](../android/src/dev/supernsh/widgets/NshWidgets.java)); KDE Plasma has a QML renderer ([`NshNode.qml`](../crates/nsh-widgets-cli/plasma/NshNode.qml), see [below](#kde-plasma)); GNOME Shell has an St renderer ([`extension.js`](../crates/nsh-widgets-cli/gnome/extension.js), see [below](#gnome-shell)). This page lists where they differ and why.
+One tree, five native renderers. iOS and macOS share the SwiftUI renderer ([`NshWidgets.swift`](../crates/nsh-widgets-cli/renderer/NshWidgets.swift), with [`NshActivities.swift`](../crates/nsh-widgets-cli/renderer/NshActivities.swift) for Live Activities); Android has the RemoteViews renderer ([`NshWidgets.java`](../android/src/dev/supernsh/widgets/NshWidgets.java)); KDE Plasma has a QML renderer ([`NshNode.qml`](../crates/nsh-widgets-cli/plasma/NshNode.qml), see [below](#kde-plasma)); GNOME Shell and Cinnamon have an St renderer ([`st.js`](../crates/nsh-widgets-cli/js/st.js), see [below](#gnome-shell)); X11 and layer-shell desktops have a GTK one ([`gtk.js`](../crates/nsh-widgets-cli/js/gtk.js)). This page lists where they differ and why.
 
 The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 (API 37) emulator, or read from the platform's API where noted. The macOS column follows from the shared renderer; the 0.1.0 features were seen on a Mac desktop, the 0.2.0 ones (options, lists) were not. See [status.md](status.md).
 
@@ -54,13 +54,13 @@ The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 
 
 **macOS.** Needs a real signing identity (a free Personal Team works) and a team-prefixed App Group in `macosAppGroup`. The app must run from a LaunchServices-indexed place such as `~/Applications`, or App Intents fail with "There is no metadata". New kinds need a `CFBundleVersion` bump (`build` in `nsh.json`). The extension is built for arm64 only.
 
-**Linux and Windows.** KDE Plasma draws widgets through a generated plasmoid and GNOME Shell through a generated extension (both below); Windows has no widget host for them. Once the app calls `configure(name)`, the store lives in `$XDG_DATA_HOME/nsh-widgets/<name>` (`~/.local/share/...` without it, `%LOCALAPPDATA%` on Windows), or in `NSH_WIDGETS_DIR` when set. `reload` does nothing. `nsh-widgets show KIND --group <name> [--follow] [--format waybar]` draws a widget as text (progress as `▓░`, bars as a sparkline, toggles as `☑`/`☐`, timers counting) or as Waybar JSON, whose bar text comes from the `accessory` tree. Without a name or the variable, calls fail with `no_group_configured`.
+**Linux and Windows.** KDE Plasma draws widgets through a generated plasmoid, GNOME Shell through an extension, Cinnamon through a desklet and other desktops through a window (all below); Windows has no widget host for them. Once the app calls `configure(name)`, the store lives in `$XDG_DATA_HOME/nsh-widgets/<name>` (`~/.local/share/...` without it, `%LOCALAPPDATA%` on Windows), or in `NSH_WIDGETS_DIR` when set. `reload` does nothing. `nsh-widgets show KIND --group <name> [--follow] [--format waybar]` draws a widget as text (progress as `▓░`, bars as a sparkline, toggles as `☑`/`☐`, timers counting) or as Waybar JSON, whose bar text comes from the `accessory` tree. Without a name or the variable, calls fail with `no_group_configured`.
 
 **Web.** No store: calls fail with `no_group_configured`, or `unsupported` once a name is configured.
 
 ## KDE Plasma
 
-`nsh-widgets plasmoid` writes a Plasma applet whose QML renderer reads the store through `nsh-widgets show --format ir` every two seconds and runs presses through `nsh-widgets apply`. Seen on Plasma 5.27 and 6.3 in `plasmoidviewer`; in a panel it draws the `accessory` tree (since 0.2.1).
+`nsh-widgets plasmoid` writes a Plasma applet whose QML renderer reads the store through `nsh-widgets show --format ir` every two seconds and runs presses through `nsh-widgets apply`. Seen on Plasma 5.27 in a full session, and on 5.27 and 6.3 in `plasmoidviewer`; in a panel it draws the `accessory` tree (since 0.2.1).
 
 | Feature | KDE Plasma |
 |---|---|
@@ -83,7 +83,7 @@ The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 
 
 ## GNOME Shell
 
-`nsh-widgets gnome` writes a GNOME Shell extension whose St renderer ([`extension.js`](../crates/nsh-widgets-cli/gnome/extension.js)) reads the store as the plasmoid does. Run on GNOME Shell 45 to 51, headless, and on 48.7 nested in a window.
+`nsh-widgets gnome` writes a GNOME Shell extension whose St renderer ([`st.js`](../crates/nsh-widgets-cli/js/st.js)) reads the store as the plasmoid does. Run on GNOME Shell 45 to 51, headless, and on 48.7 nested in a window.
 
 | What | On GNOME Shell |
 |---|---|
@@ -103,5 +103,11 @@ The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 
 | `hide` | `medium` in the popup, `inline` in the bar |
 | Not supported | the widget `url`, options, Live Activities, controls |
 | Updates | polled every two seconds |
+
+## Cinnamon, X11 and layer-shell
+
+The Cinnamon desklet draws with the GNOME renderer ([`st.js`](../crates/nsh-widgets-cli/js/st.js)), so the table above holds for it, except that the `root` tree is on the desktop, there is no bar form, and light or dark follows Cinnamon. Run on Cinnamon 6.0, 6.4 and 6.6.
+
+`nsh-widgets window` draws with GTK 3 ([`gtk.js`](../crates/nsh-widgets-cli/js/gtk.js)): the same limits, except that `br` gradients are diagonal. It draws only the `root` tree. Run on Xfce (X11) and sway (layer-shell).
 
 **Preview.** `nsh-widgets preview` draws the IR as HTML with the same rules (sizes per family, root background and padding, templates, timers at the current time). It is a check, not a fourth renderer: the native renderers are the reference.

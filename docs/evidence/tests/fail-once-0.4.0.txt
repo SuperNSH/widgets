@@ -1,0 +1,17 @@
+# Deliberately broken code, 24 November 2026: the new 0.4.0 test failing, once per break
+## renderer left out
+tests::cinnamon_desklets_and_windows_carry_their_renderer --- FAILED
+thread 'tests::cinnamon_desklets_and_windows_carry_their_renderer' (154445257) panicked at crates/nsh-widgets-cli/src/tests.rs:502:5:
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.00s
+## decorations allowed
+tests::cinnamon_desklets_and_windows_carry_their_renderer --- FAILED
+thread 'tests::cinnamon_desklets_and_windows_carry_their_renderer' (154445496) panicked at crates/nsh-widgets-cli/src/tests.rs:504:5:
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.01s
+## extra margin parts accepted
+tests::cinnamon_desklets_and_windows_carry_their_renderer --- FAILED
+thread 'tests::cinnamon_desklets_and_windows_carry_their_renderer' (154445716) panicked at crates/nsh-widgets-cli/src/tests.rs:518:9:
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.01s
+## any anchor accepted
+tests::cinnamon_desklets_and_windows_carry_their_renderer --- FAILED
+thread 'tests::cinnamon_desklets_and_windows_carry_their_renderer' (154445919) panicked at crates/nsh-widgets-cli/src/tests.rs:522:5:
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.01s

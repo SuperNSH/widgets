@@ -142,3 +142,8 @@ jobs:
           cargo run -q -p nsh-widgets-cli -- gnome Dashboard --group dev.supernsh.widgets.gallery --out /tmp/g
           test -f /tmp/g/metadata.json && test -f /tmp/g/config.json
           cp /tmp/g/extension.js /tmp/g/extension.mjs && node --check /tmp/g/extension.mjs
+      - name: Generate a Cinnamon desklet and a desktop window
+        run: |
+          cargo run -q -p nsh-widgets-cli -- cinnamon Dashboard --group dev.supernsh.widgets.gallery --out /tmp/c
+          cargo run -q -p nsh-widgets-cli -- window Dashboard --group dev.supernsh.widgets.gallery --out /tmp/w
+          node --check /tmp/c/desklet.js && node --check /tmp/w/window.js
