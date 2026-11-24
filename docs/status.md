@@ -141,7 +141,8 @@ The store and the hand-written Kinds tree are 0.3.0's. Presses here are a pointe
 
 - Plasma 6.3.6 (Debian 13), `startplasma-x11` on a virtual X display: the desktop and panel forms drew, a press and a toggle reached the store, Agenda scrolled and kept its place, and clicking the panel opened the full widget ([session-plasma6.png](evidence/kde/session-plasma6.png)). The session was dark throughout; switching the scheme while running was not seen on 6.
 - Layer-shell on KWin 6.3.6 (`kwin_wayland` nested on X11): three windows drew; a press raised the streak, a toggle turned a row on, and `prefer-dark` redrew them ([kwin-before-and-after.png](evidence/window/kwin-before-and-after.png)). Scrolling was not checked there.
-- labwc 0.8.3 and wayfire 0.9 did not start in the chroot (labwc crashed before any window), so they are unverified.
+- Layer-shell on labwc 0.9.3 (Ubuntu 26.04, nested on X11): three windows drew; a press, a toggle and `prefer-dark` worked ([labwc-pressed-and-dark.png](evidence/window/labwc-pressed-and-dark.png)). Scrolling was not checked there.
+- Hyprland 0.53.3 and wayfire did not start: both need a GPU render device, which the cloud machine does not have.
 
 ### GNOME
 
@@ -149,7 +150,7 @@ The renderer was split into shared files, so the probe ran again on all seven ve
 
 ### Not verified in 0.4.0
 
-- Hyprland, COSMIC, labwc, wayfire and other layer-shell compositors; X11 desktops other than Xfce.
+- Hyprland, COSMIC, wayfire and other layer-shell compositors; X11 desktops other than Xfce.
 - A full GNOME session.
 - Several monitors, and fractional scaling.
 

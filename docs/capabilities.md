@@ -108,6 +108,6 @@ The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 
 
 The Cinnamon desklet draws with the GNOME renderer ([`st.js`](../crates/nsh-widgets-cli/js/st.js)), so the table above holds for it, except that the `root` tree is on the desktop, there is no bar form, and light or dark follows Cinnamon. Run on Cinnamon 6.0, 6.4 and 6.6.
 
-`nsh-widgets window` draws with GTK 3 ([`gtk.js`](../crates/nsh-widgets-cli/js/gtk.js)): the same limits, except that `br` gradients are diagonal. It draws only the `root` tree. Run on Xfce (X11), sway and KWin (layer-shell).
+`nsh-widgets window` draws with GTK 3 ([`gtk.js`](../crates/nsh-widgets-cli/js/gtk.js)): the same limits, except that `br` gradients are diagonal. It draws only the `root` tree. Run on Xfce (X11), sway, KWin and labwc (layer-shell).
 
 **Preview.** `nsh-widgets preview` draws the IR as HTML with the same rules (sizes per family, root background and padding, templates, timers at the current time). It is a check, not a fourth renderer: the native renderers are the reference.

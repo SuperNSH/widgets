@@ -54,7 +54,7 @@ Version 0.4.0. Verified on 23 and 24 November 2026; details and screenshots in [
 - **macOS**: 0.1.0's Tasks, Dashboard and Focus timer render on the desktop ([screenshot](docs/evidence/macos/tasks-dashboard.png)). The 0.2.0 extension builds with options; their rendering on a Mac is unverified.
 - **GNOME Shell 45 to 51** (headless, driven by a probe; 48.7 also nested, with a pointer): Dashboard, Tasks and Agenda drew from the store; a button raised the streak, a task toggled, the list scrolled and kept its place, and the popup followed the light or dark setting. A full GNOME session is unverified.
 - **Cinnamon 6.0, 6.4 and 6.6**: drawing, a button, a toggle, the list scrolled, dark while running, removed and added back.
-- **X11 (Xfce) and layer-shell (sway, KWin)**: the same, with the window staying under others. Hyprland and COSMIC have layer-shell but were not run.
+- **X11 (Xfce) and layer-shell (sway, KWin, labwc)**: the same, with the window staying under others. Hyprland and COSMIC have layer-shell but were not run.
 - **Windows, and Wayland compositors without layer-shell**: no widget host. `nsh-widgets show --group NAME --follow` prints a widget for a terminal or, with `--format waybar`, for Waybar.
 - **Physical iPhone and Android devices**: not tested.
 
