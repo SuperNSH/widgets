@@ -22,4 +22,5 @@ cp -R "$A/res" "$WORK/aar/res"
 } > "$WORK/aar/R.txt"
 rm -f "$A/nsh-widgets.aar"
 (cd "$WORK/aar" && find . -exec touch -t 202601010000 {} + && zip -qrX "$A/nsh-widgets.aar" AndroidManifest.xml R.txt classes.jar res)
+"$ROOT/scripts/aar-sources.sh" > "$A/nsh-widgets.aar.sources"
 echo "built $A/nsh-widgets.aar ($(wc -l < "$WORK/aar/R.txt" | tr -d ' ') resources)"

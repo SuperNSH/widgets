@@ -4,14 +4,18 @@
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 AAR=$ROOT/android/nsh-widgets.aar
+# Class bytes vary with the JDK, so a hash of the sources the AAR was built from stands in for them.
+if [ "$("$ROOT/scripts/aar-sources.sh")" != "$(cat "$AAR.sources")" ]; then
+  echo "android/nsh-widgets.aar is stale: its sources changed since it was built. Run scripts/build-aar.sh."; exit 1
+fi
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
-cp "$AAR" "$WORK/committed.aar"
+cp "$AAR" "$WORK/committed.aar"; cp "$AAR.sources" "$WORK/committed.sources"
 "$ROOT/scripts/build-aar.sh" >/dev/null
 mkdir -p "$WORK/a" "$WORK/b"
 (cd "$WORK/a" && unzip -q "$WORK/committed.aar" && mkdir c && cd c && unzip -q ../classes.jar)
 (cd "$WORK/b" && unzip -q "$AAR" && mkdir c && cd c && unzip -q ../classes.jar)
-cp "$WORK/committed.aar" "$AAR"
+cp "$WORK/committed.aar" "$AAR"; cp "$WORK/committed.sources" "$AAR.sources"
 list() { (cd "$1" && find . -type f ! -name classes.jar ! -path './c/META-INF/*' | sort); }
 if ! diff <(list "$WORK/a") <(list "$WORK/b") >/dev/null; then
   echo "android/nsh-widgets.aar is stale: its files differ from the sources. Run scripts/build-aar.sh."; diff <(list "$WORK/a") <(list "$WORK/b") || true; exit 1

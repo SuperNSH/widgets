@@ -1,0 +1,10 @@
+# Deliberately broken code, 24 November 2026: each new 0.2.0 test failing
+test tests::plasmoids_name_their_command_and_store ... FAILED
+test tests::options_activities_and_controls_reach_the_ios_bundle ... FAILED
+test tests::live_activities_turn_on_the_info_plist_key ... FAILED
+test tests::bad_options_and_controls_are_listed ... FAILED
+test tests::apply_runs_actions_on_a_store_and_queues_events ... FAILED
+test result: FAILED. 14 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+error: test failed, to rerun pass `-p nsh-widgets-cli --bin nsh-widgets`
+✗ tests/base.test.ts › lists hold one item tree and a cap (0ms)
+error 15 tests: 14 passed, 1 failed (29.3s)
