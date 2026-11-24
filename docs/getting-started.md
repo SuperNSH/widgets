@@ -334,7 +334,7 @@ Then add it from the desktop's or panel's widget list. Options:
 | `--command PATH` | The `nsh-widgets` the plasmoid runs. Default: the path of the one that wrote it. |
 | `--app DIR` | Where `widgets.json` is, for the widget's name and description. Optional. |
 
-The package holds `metadata.json`, `contents/ui/main.qml` and `contents/ui/NshNode.qml`, a generic QML renderer of the IR. Every two seconds it runs `nsh-widgets show KIND --group NAME --format ir` through Plasma's executable data engine and redraws; a button press runs `nsh-widgets apply`. On the desktop it draws the `root` tree; in a panel it draws the `accessory` tree and opens the full widget when clicked. Light or dark follows the Plasma theme.
+The package holds `metadata.json`, `contents/ui/main.qml` and `contents/ui/NshNode.qml`, a generic QML renderer of the IR. Every two seconds it runs `nsh-widgets show KIND --group NAME --format ir` through Plasma's executable data engine and redraws when something changed; a button press runs `nsh-widgets apply`. On the desktop it draws the `root` tree; in a panel it draws the `accessory` tree and opens the full widget when clicked. Light or dark follows the Plasma theme.
 
 The app must call `Widgets.configure(NAME)` on Linux so its store is `$XDG_DATA_HOME/nsh-widgets/NAME`, and the machine needs the `nsh-widgets` binary.
 

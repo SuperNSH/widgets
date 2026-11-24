@@ -10,7 +10,7 @@
 - New commands and formats: `show --format ir` prints the snapshot and data as JSON; `apply KIND ACTION` runs `inc`, `dec` or `toggle` on a store and queues the event for the app.
 - iOS lock-screen circular widgets are centred on the system's `AccessoryWidgetBackground`.
 - `examples/gallery`: Agenda (a list), Weather (options), an Order Live Activity, and two controls (Ship it, Count +1).
-- Verified on the iOS 27 simulator (lock-screen widgets, the Live Activity, options, the list, controls), an Android 17 emulator (the scrolling list, options, tiles) and KDE Plasma 5.27. Plasma 6, macOS rendering of the new features and physical devices are unverified.
+- Verified on the iOS 27 simulator (lock-screen widgets, the Live Activity, options, the list, controls), an Android 17 emulator (the scrolling list, options, tiles) and KDE Plasma 5.27 and 6.3. macOS rendering of the new features, the KDE panel form and physical devices are unverified.
 
 ## 0.1.0 (2026-11-24)
 

@@ -14,7 +14,7 @@ Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery
 | macOS | Packaged and signed by NSH main (Apple Development identity, team App Group via `macosAppGroup`), installed to `~/Applications`. On the desktop the library's Tasks (checklist rows), Dashboard (gradient banner, progress, bar chart, icons, 9200 steps from the app) and Focus timer (stopwatch, countdown, clock, rotating tip) render with the app's data ([tasks-dashboard.png](evidence/macos/tasks-dashboard.png), [focus-timer.png](evidence/macos/focus-timer.png)). Pressing a Tasks row on the desktop toggled it without the app (reported by the user on 23 November 2026; no screenshot). |
 | macOS, 0.2.0 features | The extension builds with options. Options and lists have not been seen on a Mac: unverified. |
 | KDE Plasma 5.27 | Verified in 0.2.0 in `plasmoidviewer` on Ubuntu 24.04: Dashboard, a button press, Tasks toggled, the Agenda list scrolled. |
-| KDE Plasma 6 | The package is generated (and CI generates one) but has not been run: unverified. |
+| KDE Plasma 6.3 | Verified in 0.2.0 in `plasmoidviewer` on Debian 13: Dashboard and a button press (streak 13 to 14, [plasma6-dashboard-after-button.jpg](evidence/kde/plasma6-dashboard-after-button.jpg)), a task toggled ([plasma6-tasks-toggled.jpg](evidence/kde/plasma6-tasks-toggled.jpg)), and the Agenda list scrolled and still in place seven seconds later ([plasma6-agenda-scrolled.jpg](evidence/kde/plasma6-agenda-scrolled.jpg)). This run found two bugs, fixed before release and rechecked on Plasma 5.27: a list grew the widget instead of scrolling, and each two-second read reset its scroll. |
 | Physical iPhone | Not tested. |
 | Physical Android device | Not tested. |
 | GNOME, other Linux desktops, Windows | No widget host. `nsh-widgets show` draws a widget as text or Waybar JSON; checked on macOS against the simulator's store ([show.txt](evidence/tests/show.txt)). The Linux and Windows store paths are covered by code review only. |
@@ -82,7 +82,7 @@ The Ubuntu machine's clock in these screenshots reads 23 November, 21:22 to 21:2
 ### Not verified in 0.2.0
 
 - macOS rendering of options and lists. The Mac extension builds with the generated option intents; nothing was placed on a Mac.
-- Plasma 6. `--plasma 6` (the default) writes the Plasma 6 imports and metadata from the same renderer; no Plasma 6 session was available.
+- The KDE panel form (the `accessory` tree). Only the desktop form was seen, in `plasmoidviewer`, not in a full Plasma session.
 - GNOME: no host. `show` and Waybar cover it.
 - Physical iPhone and Android devices: none was connected, and `nsh-widgets doctor --app` on the gallery reported no provisioning profiles for the app or its extension.
 
@@ -92,15 +92,15 @@ The Ubuntu machine's clock in these screenshots reads 23 November, 21:22 to 21:2
 |---|---|
 | `cargo test --workspace` | 10 store tests ([`tests/store.rs`](../tests/store.rs)) and 19 CLI tests ([`tests.rs`](../crates/nsh-widgets-cli/src/tests.rs)) pass. |
 | `nsh test` in `packages/nsh-widgets` | 15 tests pass: 12 in [`base.test.ts`](../packages/nsh-widgets/tests/base.test.ts), 3 in [`kit.test.ts`](../packages/nsh-widgets/tests/kit.test.ts). |
-| `scripts/check-aar.sh` | The committed AAR matches its sources; a planted extra drawable made it fail. |
+| `scripts/check-aar.sh` | The committed AAR matches its sources; a planted extra drawable made it fail, and so did an edit to a Java file (it compares a hash of the sources). |
 
-Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence/tests/nsh-test.txt). Each suite was seen to fail once against deliberately broken code: in 0.1.0 the action inbox, the `nsh.json` writer, the action check in `base.ts` and the toggle in the text renderer; in 0.2.0 removing `list` from the store's node types, and dropping the tile entries from the generated Android manifest. The Swift, Java and QML renderers are covered only by the simulator, emulator and Plasma runs above. CI is defined in `.github/workflows/ci.yml`.
+Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence/tests/nsh-test.txt). Each suite was seen to fail once against deliberately broken code: in 0.1.0 the action inbox, the `nsh.json` writer, the action check in `base.ts` and the toggle in the text renderer; in 0.2.0 removing `list` from the store's node types, dropping the tile entries from the generated Android manifest, and one break for each other new test ([fail-once-0.2.0.txt](evidence/tests/fail-once-0.2.0.txt)). The Swift, Java and QML renderers are covered only by the simulator, emulator and Plasma runs above. CI is defined in `.github/workflows/ci.yml`.
 
 ## Not done
 
 - A GNOME Shell host and a Windows widget host; `show` covers terminals and Waybar
 - Tests on physical devices
-- Plasma 6, run rather than generated
+- The KDE panel form
 - macOS runs of options and lists
 - A crates.io and npm release (NSH installs from the git tags)
 
