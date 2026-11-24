@@ -17,7 +17,7 @@ Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery
 | KDE Plasma 6.3 | Verified in 0.2.0 in `plasmoidviewer` on Debian 13: Dashboard and a button press (streak 13 to 14, [plasma6-dashboard-after-button.jpg](evidence/kde/plasma6-dashboard-after-button.jpg)), a task toggled ([plasma6-tasks-toggled.jpg](evidence/kde/plasma6-tasks-toggled.jpg)), and the Agenda list scrolled and still in place seven seconds later ([plasma6-agenda-scrolled.jpg](evidence/kde/plasma6-agenda-scrolled.jpg)). This run found two bugs, fixed before release and rechecked on Plasma 5.27: a list grew the widget instead of scrolling, and each two-second read reset its scroll. |
 | Physical iPhone | Not tested. |
 | Physical Android device | Not tested. |
-| GNOME Shell 48.7 | Verified in 0.3.0, nested on Debian 13: drawing, a button press, a toggle, the Agenda list scrolled, light and dark, timers. Other versions and a full session are unverified. |
+| GNOME Shell 45 to 51 | Verified in 0.3.0: 48.7 nested with a pointer, all seven headless through a probe: drawing, a button press, a toggle, the Agenda list scrolled, light and dark, timers, disable and enable. A full session is unverified. |
 | Other Linux desktops, Windows | No widget host. `nsh-widgets show` draws a widget as text or Waybar JSON; checked on macOS against the simulator's store ([show.txt](evidence/tests/show.txt)). The Linux and Windows store paths are covered by code review only. |
 | Web | No store. |
 
@@ -103,9 +103,16 @@ The Ubuntu machine's clock in these screenshots reads 23 November, 21:22 to 21:2
 - All six extensions went through disable and enable with no JavaScript error in the shell's log.
 - Found and fixed here: a timer inside `rotate` went on writing to its destroyed label.
 
+### GNOME Shell 45 to 51 (headless)
+
+[`scripts/gnome-probe`](../scripts/gnome-probe), an extension that drives the others, ran inside GNOME Shell 45.0, 46.0, 47.0, 49.0, 50.1 and 51.0 (Ubuntu 23.10 to 26.10) and 48.7 (Debian 13), each `gnome-shell --headless` in a chroot. Presses there are the buttons' `clicked` signals, not a pointer. Results: [versions.txt](evidence/gnome/versions.txt); pictures: [45 to 48](evidence/gnome/versions-45-48.png), [49 to 51](evidence/gnome/versions-49-51.png). Where no emoji font was installed the flame drew as a red square.
+
+- On every version: all six extensions active, the bar drew the `accessory` tree, "+1 day" raised the streak in the store and the popup, a task toggled, Agenda kept its place for 6.5 seconds, `prefer-dark` redrew the open popup dark, the timer counted, the empty kind said so, and disable and enable worked. No JavaScript error in any log.
+- Found and fixed here: on 51, where `St.BoxLayout` has no `vertical`, nothing drew; on 45, redrawing a list aborted the shell.
+
 ### Not verified in 0.3.0
 
-- A full GNOME session (not nested), GNOME 45 to 47, and any version after 48.
+- A full GNOME session: every run was nested or headless, and only 48.7 was pressed with a pointer.
 - The Counter, Focus timer, Icons and Weather kinds on GNOME: the store did not hold them.
 
 ## Tests
@@ -116,7 +123,7 @@ The Ubuntu machine's clock in these screenshots reads 23 November, 21:22 to 21:2
 | `nsh test` in `packages/nsh-widgets` | 15 tests pass: 12 in [`base.test.ts`](../packages/nsh-widgets/tests/base.test.ts), 3 in [`kit.test.ts`](../packages/nsh-widgets/tests/kit.test.ts). |
 | `scripts/check-aar.sh` | The committed AAR matches its sources; a planted extra drawable made it fail, and so did an edit to a Java file (it compares a hash of the sources). |
 
-Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence/tests/nsh-test.txt). Each suite was seen to fail once against deliberately broken code: in 0.1.0 the action inbox, the `nsh.json` writer, the action check in `base.ts` and the toggle in the text renderer; in 0.2.0 removing `list` from the store's node types, dropping the tile entries from the generated Android manifest, and one break for each other new test ([fail-once-0.2.0.txt](evidence/tests/fail-once-0.2.0.txt)). The 0.3.0 test was seen to fail four ways ([fail-once-0.3.0.txt](evidence/tests/fail-once-0.3.0.txt)). The Swift, Java, QML and GNOME renderers are covered only by the simulator, emulator, Plasma and GNOME runs above. CI is defined in `.github/workflows/ci.yml`.
+Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence/tests/nsh-test.txt). Each suite was seen to fail once against deliberately broken code: in 0.1.0 the action inbox, the `nsh.json` writer, the action check in `base.ts` and the toggle in the text renderer; in 0.2.0 removing `list` from the store's node types, dropping the tile entries from the generated Android manifest, and one break for each other new test ([fail-once-0.2.0.txt](evidence/tests/fail-once-0.2.0.txt)). The 0.3.0 test was seen to fail five ways ([fail-once-0.3.0.txt](evidence/tests/fail-once-0.3.0.txt)). The Swift, Java, QML and GNOME renderers are covered only by the simulator, emulator, Plasma and GNOME runs above. CI is defined in `.github/workflows/ci.yml`.
 
 ## Not done
 

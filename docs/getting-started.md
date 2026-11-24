@@ -357,7 +357,7 @@ It prints the two steps that follow: copying the directory to `~/.local/share/gn
 
 The bar draws the kind's `accessory` tree, or its name when it has none; the popup draws the `root` tree. The extension runs `nsh-widgets show KIND --group NAME --format ir` every two seconds and redraws when something changed; a press runs `nsh-widgets apply`. Both run as a program with arguments, with no shell. Light or dark follows GNOME's Dark Style.
 
-The metadata lists GNOME 45 to 48. Only 48.7 has been run.
+The metadata lists GNOME 45 to 51, and each was run ([status.md](status.md)). GNOME turns an extension off on a version its metadata does not list, so a later GNOME needs a newer `nsh-widgets`. Icons such as the flame are emoji and need an emoji font on the machine.
 
 ## Platform notes
 

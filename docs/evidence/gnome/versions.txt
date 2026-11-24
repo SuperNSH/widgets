@@ -1,0 +1,11 @@
+# scripts/gnome-probe on GNOME Shell 45.0, 46.0, 47.0, 48.7, 49.0, 50.1 and 51.0, headless in chroots, 24 November 2026
+# at 9531d25. One line per version. streak: the store before and after '+1 day', and the popup's text. t3: the store before and
+# after the toggle. scroll: the Agenda's place before and after 6.5 s, and whether it is the same view. timer: 3 s apart.
+# cycle: all six extensions off and on again. jserr: 'JS ERROR' and 'disposed' lines in the shell's log.
+45 states {'1'} bar ['⚡', '9041', 'steps'] streak [14, 15, '15 day streak'] t3 [False, True] scroll [132, 132, True] dark [True] timer ['21:06', '21:09'] cycle True err None [] jserr 0
+46 states {'1'} bar ['⚡', '9041', 'steps'] streak [14, 15, '15 day streak'] t3 [False, True] scroll [132, 132, True] dark [True] timer ['21:58', '22:01'] cycle True err None [] jserr 0
+47 states {'1'} bar ['⚡', '9041', 'steps'] streak [14, 15, '15 day streak'] t3 [False, True] scroll [132, 132, True] dark [True] timer ['22:49', '22:52'] cycle True err None [] jserr 0
+48 states {'1'} bar ['⚡', '9041', 'steps'] streak [14, 15, '15 day streak'] t3 [False, True] scroll [168, 168, True] dark [True] timer ['23:42', '23:45'] cycle True err None [] jserr 0
+49 states {'1'} bar ['⚡', '9041', 'steps'] streak [14, 15, '15 day streak'] t3 [False, True] scroll [132, 132, True] dark [True] timer ['24:34', '24:37'] cycle True err None [] jserr 0
+50 states {'1'} bar ['⚡', '9041', 'steps'] streak [14, 15, '15 day streak'] t3 [False, True] scroll [132, 132, True] dark [True] timer ['25:26', '25:29'] cycle True err None [] jserr 0
+51 states {'1'} bar ['⚡', '9041', 'steps'] streak [14, 15, '15 day streak'] t3 [False, True] scroll [132, 132, True] dark [True] timer ['26:17', '26:20'] cycle True err None [] jserr 0

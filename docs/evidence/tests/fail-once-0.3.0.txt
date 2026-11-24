@@ -15,3 +15,7 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 19 filtered out;
 tests::gnome_extensions_have_a_valid_id_and_run_no_shell --- FAILED
 thread 'tests::gnome_extensions_have_a_valid_id_and_run_no_shell' (154338035) panicked at crates/nsh-widgets-cli/src/tests.rs:474:5:
 test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.00s
+## 51 dropped from the version list
+tests::gnome_extensions_have_a_valid_id_and_run_no_shell --- FAILED
+thread 'tests::gnome_extensions_have_a_valid_id_and_run_no_shell' (154383501) panicked at crates/nsh-widgets-cli/src/tests.rs:466:5:
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.00s

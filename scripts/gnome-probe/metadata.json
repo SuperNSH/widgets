@@ -1,0 +1,7 @@
+{
+  "uuid": "probe@test",
+  "name": "nsh-widgets probe",
+  "description": "Drives the gallery's GNOME extensions inside a headless shell and writes /tmp/probe/out.json.",
+  "shell-version": ["45", "46", "47", "48", "49", "50", "51"],
+  "url": "https://github.com/SuperNSH/widgets"
+}

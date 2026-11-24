@@ -2,7 +2,7 @@
 
 ## 0.3.0 (2026-11-24)
 
-- GNOME Shell. `nsh-widgets gnome KIND --group NAME [--out DIR] [--command PATH]` writes a GNOME Shell extension: the kind's `accessory` tree in the top bar and its `root` tree in the popup, with buttons, toggles, scrolling lists, timers, and light and dark. It reads through `nsh-widgets show --format ir` and presses through `nsh-widgets apply`, with no shell in between. Verified on GNOME Shell 48.7, nested; 45 to 47 are listed but have not been run.
+- GNOME Shell. `nsh-widgets gnome KIND --group NAME [--out DIR] [--command PATH]` writes a GNOME Shell extension: the kind's `accessory` tree in the top bar and its `root` tree in the popup, with buttons, toggles, scrolling lists, timers, and light and dark. It reads through `nsh-widgets show --format ir` and presses through `nsh-widgets apply`, with no shell in between. Run on GNOME Shell 45 to 51 (headless; 48.7 also nested). `scripts/gnome-probe` repeats the check.
 
 ## 0.2.1 (2026-11-24)
 

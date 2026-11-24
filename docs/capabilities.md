@@ -83,7 +83,7 @@ The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 
 
 ## GNOME Shell
 
-`nsh-widgets gnome` writes a GNOME Shell extension whose St renderer ([`extension.js`](../crates/nsh-widgets-cli/gnome/extension.js)) reads the store as the plasmoid does. Seen on GNOME Shell 48.7, nested in a window; the metadata also lists 45 to 47, which have not been run.
+`nsh-widgets gnome` writes a GNOME Shell extension whose St renderer ([`extension.js`](../crates/nsh-widgets-cli/gnome/extension.js)) reads the store as the plasmoid does. Run on GNOME Shell 45 to 51, headless, and on 48.7 nested in a window.
 
 | What | On GNOME Shell |
 |---|---|
@@ -93,7 +93,7 @@ The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 
 | Root background and padding | the root's `bg` or gradient fills a rounded frame (radius 12); the root's `pad`, 16 by default |
 | Gradients | `r` horizontal; `b` and `br` both vertical |
 | Text | `St.Label` in the shell's font; bundled fonts are not used |
-| Icons | Unicode and emoji glyphs |
+| Icons | Unicode and emoji glyphs; the emoji ones need an emoji font |
 | `progress`, `bars` | rounded rectangles |
 | `timer`, `clock` | counted each second (`h:mm:ss` or `m:ss`, `hh:mm`) |
 | `rotate` | changes child every `interval` seconds |
