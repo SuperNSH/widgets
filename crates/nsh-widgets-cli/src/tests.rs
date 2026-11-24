@@ -502,6 +502,8 @@ fn cinnamon_desklets_and_windows_carry_their_renderer() {
     assert!(desklet.contains("class Base") && desklet.contains("new St.ScrollView") && !desklet.contains("@RENDERER@"));
     let meta: serde_json::Value = serde_json::from_str(&read("metadata.json")).unwrap();
     assert_eq!(meta["prevent-decorations"], true);
+    let crlf = crate::host::with_renderer("a\r\n//@RENDERER@\r\nb", "R");
+    assert!(crlf.contains("class Base") && crlf.contains('R') && !crlf.contains("@RENDERER@"));
     args.anchor = Some("bottom-left".into());
     args.margin = Some("12, 40".into());
     crate::window::write(&args).unwrap();

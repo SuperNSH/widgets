@@ -96,5 +96,6 @@ pub fn pretty(v: &Value) -> String {
 
 /// A script with the shared code and `renderer` in it.
 pub fn with_renderer(script: &str, renderer: &str) -> String {
-    script.replace("//@RENDERER@\n", &format!("{COMMON}\n{renderer}"))
+    // Without the line's end: a Windows checkout ends it with CRLF.
+    script.replace("//@RENDERER@", &format!("{COMMON}\n{renderer}"))
 }
