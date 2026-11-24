@@ -104,7 +104,10 @@ Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence
 - macOS runs of options and lists
 - A crates.io and npm release (NSH installs from the git tags)
 
-## Release 0.1.0
+## Release
+
+- Tag `v0.2.0` on `1372cce`; CI run https://github.com/SuperNSH/widgets/actions/runs/45327392050 passed all 12 jobs. In a blank app, `nsh add github:SuperNSH/widgets@^0.2` resolved to 0.2.0 at that commit, `nsh check` passed, and the released `nsh-widgets` (aarch64 macOS, SHA-256 checked) built a kind with options, a list, a Live Activity and a control; `nsh package` built the iOS simulator app and the Android APK.
+.1.0
 
 - Tag `v0.1.0` on `fe8cb17`. In a blank app, `nsh add github:SuperNSH/widgets@^0.1` resolved to 0.1.0 at that commit, `nsh check` type-checked imports of `nsh-widgets` and `nsh-widgets/kit`, `nsh-widgets init` and `build` ran, and `nsh package` built both the Android APK (54 `nsh_widgets` entries) and the iOS simulator app (with `NshWidgets.appex`). On the emulator the installed APK registered `NshWidgetProvider$Slot1` as a widget provider.
 - [Release v0.1.0](https://github.com/SuperNSH/widgets/releases/tag/v0.1.0) carries `nsh-widgets` for aarch64 and x86_64 macOS, x86_64 Linux and x86_64 Windows, each with a SHA-256 file. The aarch64 macOS archive was downloaded, checked against its SHA-256 and run (`help`, `show`).
