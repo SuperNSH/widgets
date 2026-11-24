@@ -98,8 +98,14 @@ import QtQuick.Layouts 1.15
         // In a panel: the kind's lock-screen tree, as the iOS lock screen and Waybar show it.
         Layout.minimumWidth: item ? item.implicitWidth : 24
         readonly property var node: main.snap ? (main.snap.accessory || main.snap.root) : null
-        onNodeChanged: if (node) setSource("NshNode.qml", { n: node, vals: main.vals, dark: main.dark, now: main.now, family: "inline", run: main.run })
-        onLoaded: { item.now = Qt.binding(function () { return main.now }); item.vals = Qt.binding(function () { return main.vals }) }
+        id: small
+        onNodeChanged: load()
+        // Children get their data when they are built, so new data builds them again, as in the full form.
+        Connections { target: main; function onValsChanged() { small.load() } function onDarkChanged() { small.load() } }
+        function load() {
+            if (node) setSource("NshNode.qml", { n: node, vals: main.vals, dark: main.dark, now: main.now, family: "inline", run: main.run })
+        }
+        onLoaded: item.now = Qt.binding(function () { return main.now })
         MouseArea { anchors.fill: parent; onClicked: @EXPANDED@ = !@EXPANDED@ }
     }
 }

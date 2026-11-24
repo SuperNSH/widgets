@@ -411,6 +411,10 @@ fn plasmoids_name_their_command_and_store() {
             q.contains("PlasmaCore.Types.Horizontal") && q.contains("compactRepresentation : "),
             "a panel gets the small tree"
         );
+        assert!(
+            q.contains("function onValsChanged() { small.load() }"),
+            "a panel follows its data"
+        );
     }
     assert!(crate::plasma::main_qml(4, "S", "x", "y").is_err());
     assert_eq!(
