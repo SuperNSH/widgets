@@ -233,8 +233,12 @@ export default class NshWidgetExtension extends Extension {
 
     _run(action) {
         if (action.startsWith('open:')) {
-            Gio.AppInfo.launch_default_for_uri(action.slice(5), null);
             this._button.menu.close();
+            try {
+                Gio.AppInfo.launch_default_for_uri(action.slice(5), null);
+            } catch (e) {
+                console.warn(`nsh-widgets: ${e.message}`);
+            }
             return;
         }
         this._spawn(['apply', this._config.kind, action, ...this._config.source], () => this._read());
