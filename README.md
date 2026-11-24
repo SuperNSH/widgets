@@ -58,7 +58,7 @@ Version 0.4.0. Verified on 23 and 24 November 2026; details and screenshots in [
 - **Windows, and Wayland compositors without layer-shell**: no widget host. `nsh-widgets show --group NAME --follow` prints a widget for a terminal or, with `--format waybar`, for Waybar.
 - **Physical iPhone and Android devices**: not tested.
 
-Tests: `cargo test --workspace` runs 10 store tests and 21 CLI tests; `nsh test` in `packages/nsh-widgets` runs 15 TS tests. Output is in `docs/evidence/tests/`. Each suite was seen to fail once against deliberately broken code. CI runs format, clippy and tests on Linux, macOS and Windows, cross-checks iOS, Android and web, checks the committed Android AAR against its sources, builds the gallery's widget extensions on macOS, type-checks the gallery with NSH nightly, generates a Plasma 5 and a Plasma 6 plasmoid a GNOME extension, a Cinnamon desklet and a desktop window (without loading them), and runs the TS checks.
+Tests: `cargo test --workspace` runs 10 store tests and 21 CLI tests; `nsh test` in `packages/nsh-widgets` runs 15 TS tests. Output is in `docs/evidence/tests/`. Each suite was seen to fail once against deliberately broken code. CI runs format, clippy and tests on Linux, macOS and Windows, cross-checks iOS, Android and web, checks the committed Android AAR against its sources, builds the gallery's widget extensions on macOS, type-checks the gallery with NSH nightly, generates a Plasma 5 and a Plasma 6 plasmoid, a GNOME extension, a Cinnamon desklet and a desktop window (without loading them), and runs the TS checks.
 
 Not in this release:
 
