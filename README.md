@@ -66,7 +66,7 @@ Not in this release:
 
 - A Windows widget host and a COSMIC applet; `show` covers terminals and Waybar
 - Runs on physical devices
-- A crates.io and npm release (NSH installs from the git tags)
+- An npm release
 
 ## Requirements
 

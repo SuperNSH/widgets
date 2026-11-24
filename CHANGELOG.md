@@ -1,24 +1,24 @@
 # Changelog
 
-## 0.4.1 (2026-11-24)
+## [0.4.1] - 2026-11-24
 
 - The library and the CLI are published on crates.io: `nsh add nsh-widgets` and `cargo install nsh-widgets-cli`. A version tag publishes both once CI has passed on its commit. No code changes since 0.4.0.
 
-## 0.4.0 (2026-11-24)
+## [0.4.0] - 2026-11-24
 
 - Cinnamon. `nsh-widgets cinnamon KIND --group NAME` writes a desklet that draws the kind's `root` tree on the desktop, with the GNOME renderer. Run on Cinnamon 6.0, 6.4 and 6.6.
 - X11 and layer-shell. `nsh-widgets window KIND --group NAME [--anchor CORNER] [--margin X,Y]` writes a GJS script (GTK 3) that keeps a window under the others: a layer-shell surface on Wayland compositors that have the protocol, a kept-below window on X11. Run on Xfce (X11) and sway.
 - KDE Plasma 5.27 checked in a full session: desktop and panel forms, presses, the panel popup, Breeze Dark.
 
-## 0.3.0 (2026-11-24)
+## [0.3.0] - 2026-11-24
 
 - GNOME Shell. `nsh-widgets gnome KIND --group NAME [--out DIR] [--command PATH]` writes a GNOME Shell extension: the kind's `accessory` tree in the top bar and its `root` tree in the popup, with buttons, toggles, scrolling lists, timers, and light and dark. It reads through `nsh-widgets show --format ir` and presses through `nsh-widgets apply`, with no shell in between. Run on GNOME Shell 45 to 51 (headless; 48.7 also nested). `scripts/gnome-probe` repeats the check.
 
-## 0.2.1 (2026-11-24)
+## [0.2.1] - 2026-11-24
 
 - KDE Plasma: in a panel the widget drew its full form, and once fixed its templates stayed unfilled. It now draws the `accessory` tree, follows its data, and opens the full widget when clicked. Plasmoids written by 0.2.0 need `nsh-widgets plasmoid` run again.
 
-## 0.2.0 (2026-11-24)
+## [0.2.0] - 2026-11-24
 
 - Live Activities on iOS. `widgets.json` `activities` lists the kinds that can run as one. `Widgets.startActivity(kind, data)`, `updateActivity`, `endActivity` in TS; `start_activity`, `update_activity`, `end_activity` in Rust. The lock-screen banner and the expanded Dynamic Island draw the kind's `root` tree; the compact and minimal Dynamic Island draw its `accessory` tree, a row's first child leading and the rest trailing. The activity's data lies over the kind's stored data. One activity per kind: a new start replaces the running one. `build` sets `ios.infoPlist.NSSupportsLiveActivities`. ActivityKit is weak-linked, so apps still run on iOS 15. New error codes `activities_disabled`, `no_activity`, `activity_refused`; other platforms return `unsupported`.
 - Widgets the user configures. `widgets[].options` (`title`, 1 to 20 unique `values`, no `|`) gives iOS and macOS an edit sheet (a generated `AppEnum` and `WidgetConfigurationIntent` per kind) and Android a configure screen (`NshWidgetConfigureActivity`), with the choice kept per placed widget. The chosen value's object in the kind's data lies over the data, and `{option}` holds the value.
@@ -30,7 +30,7 @@
 - `examples/gallery`: Agenda (a list), Weather (options), an Order Live Activity, and two controls (Ship it, Count +1).
 - Verified on the iOS 27 simulator (lock-screen widgets, the Live Activity, options, the list, controls), an Android 17 emulator (the scrolling list, options, tiles) and KDE Plasma 5.27 and 6.3. macOS rendering of the new features, and physical devices are unverified.
 
-## 0.1.0 (2026-11-24)
+## [0.1.0] - 2026-11-24
 
 First version.
 
