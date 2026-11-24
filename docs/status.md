@@ -167,6 +167,7 @@ Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence
 
 ## Release
 
+- Tag `v0.4.0` on `d07a5f3`; CI run https://github.com/SuperNSH/widgets/actions/runs/45342080240 passed all 12 jobs. In a blank app, `nsh add github:SuperNSH/widgets@^0.4` resolved to 0.4.0 at that commit and `nsh check` passed. The released x86_64 Linux `nsh-widgets` (SHA-256 checked) wrote a Cinnamon desklet and a window, and the window ran.
 - Tag `v0.3.0` on `d1a4d28`; CI run https://github.com/SuperNSH/widgets/actions/runs/45334884052 passed all 12 jobs. In a blank app, `nsh add github:SuperNSH/widgets@^0.3` resolved to 0.3.0 at that commit and `nsh check` passed. The released `nsh-widgets` for arm64 macOS and x86_64 Linux (SHA-256 checked) each wrote a GNOME extension.
 - Tag `v0.2.0` on `1372cce`; CI run https://github.com/SuperNSH/widgets/actions/runs/45327392050 passed all 12 jobs. In a blank app, `nsh add github:SuperNSH/widgets@^0.2` resolved to 0.2.0 at that commit, `nsh check` passed, and the released `nsh-widgets` (aarch64 macOS, SHA-256 checked) built a kind with options, a list, a Live Activity and a control; `nsh package` built the iOS simulator app and the Android APK.
 .1.0
