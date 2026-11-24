@@ -406,6 +406,12 @@ fn plasmoids_name_their_command_and_store() {
     );
     let five = crate::plasma::main_qml(5, "Steps", "nsh-widgets", "--dir /tmp/s").unwrap();
     assert!(five.contains("PlasmaCore.DataSource") && five.contains("Plasmoid.fullRepresentation"));
+    for q in [&qml, &five] {
+        assert!(
+            q.contains("PlasmaCore.Types.Horizontal") && q.contains("compactRepresentation : "),
+            "a panel gets the small tree"
+        );
+    }
     assert!(crate::plasma::main_qml(4, "S", "x", "y").is_err());
     assert_eq!(
         crate::plasma::metadata(5, "id", "N", "D")["X-Plasma-MainScript"],

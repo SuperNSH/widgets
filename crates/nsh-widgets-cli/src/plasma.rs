@@ -23,7 +23,8 @@ pub fn main_qml(version: u32, kind: &str, command: &str, source: &str) -> anyhow
             "Plasmoid.compactRepresentation",
             "plasmoid.expanded",
             "Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground",
-            "Plasmoid.preferredRepresentation: Plasmoid.fullRepresentation",
+            // The small tree in a panel, the full widget on the desktop.
+            "Plasmoid.preferredRepresentation: plasmoid.formFactor === PlasmaCore.Types.Horizontal || plasmoid.formFactor === PlasmaCore.Types.Vertical ? Plasmoid.compactRepresentation : Plasmoid.fullRepresentation",
         ),
         6 => (
             "import org.kde.plasma.plasmoid\nimport org.kde.plasma.core as PlasmaCore\nimport org.kde.plasma.plasma5support as P5Support\nimport org.kde.kirigami as Kirigami",
@@ -33,7 +34,7 @@ pub fn main_qml(version: u32, kind: &str, command: &str, source: &str) -> anyhow
             "compactRepresentation",
             "main.expanded",
             "Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground",
-            "preferredRepresentation: fullRepresentation",
+            "preferredRepresentation: Plasmoid.formFactor === PlasmaCore.Types.Horizontal || Plasmoid.formFactor === PlasmaCore.Types.Vertical ? compactRepresentation : fullRepresentation",
         ),
         v => bail!("--plasma {v}: use 5 or 6"),
     };
