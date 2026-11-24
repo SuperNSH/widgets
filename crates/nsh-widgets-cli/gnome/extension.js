@@ -124,14 +124,20 @@ class Renderer {
         }
         case 'rotate': {
             const kids = node.children ?? [], bin = new St.Bin({x_align: Clutter.ActorAlign.START});
-            let shown = -1;
+            let shown = -1, own = []; // the shown child's ticks, dropped with it
             if (kids.length) {
                 this.tick(now => {
                     const i = Math.floor(now / (1000 * Math.max(1, num(node.interval, 60)))) % kids.length;
-                    if (i === shown) return;
-                    shown = i;
-                    bin.child?.destroy();
-                    bin.set_child(this.build(kids[i], data));
+                    if (i !== shown) {
+                        shown = i;
+                        bin.child?.destroy();
+                        const outer = this.ticks;
+                        this.ticks = [];
+                        bin.set_child(this.build(kids[i], data));
+                        own = this.ticks;
+                        this.ticks = outer;
+                    }
+                    for (const f of own) f(now);
                 });
             }
             return bin;
