@@ -5,6 +5,7 @@
 //!   Android widget library, then writes their entries into `nsh.json`.
 //! - `check`: checks `widgets.json` and that `nsh.json` carries what `build` writes.
 //! - `preview`: draws the widgets as an HTML page, light and dark, in every size.
+//! - `plasmoid`, `gnome`: write a KDE Plasma applet or a GNOME Shell extension for one kind.
 //! - `show`: prints one widget as text or Waybar JSON, for terminals and Linux status bars.
 //! - `doctor`: checks the tools `build` runs.
 

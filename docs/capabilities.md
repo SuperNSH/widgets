@@ -1,6 +1,6 @@
 # Capabilities by platform
 
-One tree, three native renderers. iOS and macOS share the SwiftUI renderer ([`NshWidgets.swift`](../crates/nsh-widgets-cli/renderer/NshWidgets.swift), with [`NshActivities.swift`](../crates/nsh-widgets-cli/renderer/NshActivities.swift) for Live Activities); Android has the RemoteViews renderer ([`NshWidgets.java`](../android/src/dev/supernsh/widgets/NshWidgets.java)); KDE Plasma has a QML renderer ([`NshNode.qml`](../crates/nsh-widgets-cli/plasma/NshNode.qml), see [below](#kde-plasma)). This page lists where they differ and why.
+One tree, four native renderers. iOS and macOS share the SwiftUI renderer ([`NshWidgets.swift`](../crates/nsh-widgets-cli/renderer/NshWidgets.swift), with [`NshActivities.swift`](../crates/nsh-widgets-cli/renderer/NshActivities.swift) for Live Activities); Android has the RemoteViews renderer ([`NshWidgets.java`](../android/src/dev/supernsh/widgets/NshWidgets.java)); KDE Plasma has a QML renderer ([`NshNode.qml`](../crates/nsh-widgets-cli/plasma/NshNode.qml), see [below](#kde-plasma)); GNOME Shell has an St renderer ([`extension.js`](../crates/nsh-widgets-cli/gnome/extension.js), see [below](#gnome-shell)). This page lists where they differ and why.
 
 The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 (API 37) emulator, or read from the platform's API where noted. The macOS column follows from the shared renderer; the 0.1.0 features were seen on a Mac desktop, the 0.2.0 ones (options, lists) were not. See [status.md](status.md).
 
@@ -54,7 +54,7 @@ The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 
 
 **macOS.** Needs a real signing identity (a free Personal Team works) and a team-prefixed App Group in `macosAppGroup`. The app must run from a LaunchServices-indexed place such as `~/Applications`, or App Intents fail with "There is no metadata". New kinds need a `CFBundleVersion` bump (`build` in `nsh.json`). The extension is built for arm64 only.
 
-**Linux and Windows.** KDE Plasma draws widgets through a generated plasmoid (below); GNOME and Windows have no widget host for them. Once the app calls `configure(name)`, the store lives in `$XDG_DATA_HOME/nsh-widgets/<name>` (`~/.local/share/...` without it, `%LOCALAPPDATA%` on Windows), or in `NSH_WIDGETS_DIR` when set. `reload` does nothing. `nsh-widgets show KIND --group <name> [--follow] [--format waybar]` draws a widget as text (progress as `▓░`, bars as a sparkline, toggles as `☑`/`☐`, timers counting) or as Waybar JSON, whose bar text comes from the `accessory` tree. Without a name or the variable, calls fail with `no_group_configured`.
+**Linux and Windows.** KDE Plasma draws widgets through a generated plasmoid and GNOME Shell through a generated extension (both below); Windows has no widget host for them. Once the app calls `configure(name)`, the store lives in `$XDG_DATA_HOME/nsh-widgets/<name>` (`~/.local/share/...` without it, `%LOCALAPPDATA%` on Windows), or in `NSH_WIDGETS_DIR` when set. `reload` does nothing. `nsh-widgets show KIND --group <name> [--follow] [--format waybar]` draws a widget as text (progress as `▓░`, bars as a sparkline, toggles as `☑`/`☐`, timers counting) or as Waybar JSON, whose bar text comes from the `accessory` tree. Without a name or the variable, calls fail with `no_group_configured`.
 
 **Web.** No store: calls fail with `no_group_configured`, or `unsupported` once a name is configured.
 
@@ -80,5 +80,28 @@ The iOS and Android columns were seen on the iOS 27 simulator and an Android 17 
 | In a panel | the `accessory` tree; clicking opens the full widget |
 | Not supported | the widget `url`, options, Live Activities, controls |
 | Updates | polled every two seconds, so a change in the app shows within about two seconds |
+
+## GNOME Shell
+
+`nsh-widgets gnome` writes a GNOME Shell extension whose St renderer ([`extension.js`](../crates/nsh-widgets-cli/gnome/extension.js)) reads the store as the plasmoid does. Seen on GNOME Shell 48.7, nested in a window; the metadata also lists 45 to 47, which have not been run.
+
+| What | On GNOME Shell |
+|---|---|
+| Where | a top-bar button drawing the `accessory` tree (the kind's name without one), opening a popup with the `root` tree, 320 pixels wide |
+| Layout | an `St.BoxLayout` per `col` or `row`; rows align their children to the vertical centre |
+| Light and dark colours | the popup follows Dark Style while open; the bar always uses the dark colours, since GNOME's bar is dark |
+| Root background and padding | the root's `bg` or gradient fills a rounded frame (radius 12); the root's `pad`, 16 by default |
+| Gradients | `r` horizontal; `b` and `br` both vertical |
+| Text | `St.Label` in the shell's font; bundled fonts are not used |
+| Icons | Unicode and emoji glyphs |
+| `progress`, `bars` | rounded rectangles |
+| `timer`, `clock` | counted each second (`h:mm:ss` or `m:ss`, `hh:mm`) |
+| `rotate` | changes child every `interval` seconds |
+| `toggle` | a ☑ or ☐ row, struck through when on |
+| Buttons | `inc`, `dec`, `toggle` run `nsh-widgets apply`; `open:` opens the URL and closes the popup. A URL nothing handles is logged |
+| `list` | a scrolling list of the first `max` items, 160 pixels high at most, that keeps its place between updates |
+| `hide` | `medium` in the popup, `inline` in the bar |
+| Not supported | the widget `url`, options, Live Activities, controls |
+| Updates | polled every two seconds |
 
 **Preview.** `nsh-widgets preview` draws the IR as HTML with the same rules (sizes per family, root background and padding, templates, timers at the current time). It is a check, not a fourth renderer: the native renderers are the reference.

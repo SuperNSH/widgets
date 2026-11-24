@@ -137,3 +137,8 @@ jobs:
           cargo run -q -p nsh-widgets-cli -- plasmoid Dashboard --group dev.supernsh.widgets.gallery --plasma 5 --out /tmp/p5
           cargo run -q -p nsh-widgets-cli -- plasmoid Dashboard --group dev.supernsh.widgets.gallery --plasma 6 --out /tmp/p6
           test -f /tmp/p5/contents/ui/NshNode.qml && test -f /tmp/p6/metadata.json
+      - name: Generate a GNOME Shell extension
+        run: |
+          cargo run -q -p nsh-widgets-cli -- gnome Dashboard --group dev.supernsh.widgets.gallery --out /tmp/g
+          test -f /tmp/g/metadata.json && test -f /tmp/g/config.json
+          cp /tmp/g/extension.js /tmp/g/extension.mjs && node --check /tmp/g/extension.mjs

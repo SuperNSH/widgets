@@ -1,34 +1,58 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running unittests src/lib.rs (target/debug/deps/nsh_widgets-d7d51d29fb7efc5d)
+
+running 0 tests
+
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/store.rs (target/debug/deps/store-11ee2d0bc6047597)
+
+running 10 tests
 test kinds_are_checked ... ok
 test data_must_be_an_object ... ok
 test unknown_actions_are_refused ... ok
-test lists_are_a_node_type ... ok
-test data_starts_empty_and_round_trips_in_an_envelope ... ok
 test the_lock_screen_tree_is_checked_too ... ok
-test update_keeps_what_the_widget_changed ... ok
 test snapshots_are_checked_before_they_are_written ... ok
+test data_starts_empty_and_round_trips_in_an_envelope ... ok
+test lists_are_a_node_type ... ok
+test update_keeps_what_the_widget_changed ... ok
 test actions_run_the_vocabulary_and_queue_events_once ... ok
 test the_change_token_moves_when_data_is_written ... ok
+
 test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running unittests src/main.rs (target/debug/deps/nsh_widgets-bfc10f4624e560d2)
+
+running 20 tests
 test tests::profile_identifiers_cover_bundles ... ok
-test tests::plasmoids_name_their_command_and_store ... ok
+test tests::lock_screen_families_are_ios_only ... ok
 test tests::bad_options_and_controls_are_listed ... ok
+test tests::android_gets_option_metadata_configure_screen_and_tiles ... ok
+test tests::plasmoids_name_their_command_and_store ... ok
+test tests::info_plists_carry_the_group_and_fonts ... ok
+test tests::live_activities_turn_on_the_info_plist_key ... ok
+test tests::options_activities_and_controls_reach_the_ios_bundle ... ok
 test tests::render_tests::html_frames_each_family_with_the_root_background ... ok
 test tests::render_tests::templates_fill_like_the_renderers ... ok
-test tests::live_activities_turn_on_the_info_plist_key ... ok
-test tests::lock_screen_families_are_ios_only ... ok
-test tests::info_plists_carry_the_group_and_fonts ... ok
-test tests::android_gets_option_metadata_configure_screen_and_tiles ... ok
-test tests::options_activities_and_controls_reach_the_ios_bundle ... ok
-test tests::render_tests::waybar_puts_the_lock_screen_tree_on_the_bar ... ok
 test tests::nsh_json_keeps_the_apps_keys_and_replaces_only_ours ... ok
+test tests::config_problems_are_listed ... ok
+test tests::render_tests::waybar_puts_the_lock_screen_tree_on_the_bar ... ok
 test tests::render_tests::text_follows_the_tree ... ok
 test tests::the_android_manifest_gives_each_kind_a_slot ... ok
 test tests::unknown_config_keys_are_errors ... ok
-test tests::config_problems_are_listed ... ok
 test tests::the_bundle_names_every_kind_and_groups_by_ten ... ok
+test tests::gnome_extensions_have_a_valid_id_and_run_no_shell ... ok
 test tests::the_android_library_is_a_valid_aar ... ok
 test tests::apply_runs_actions_on_a_store_and_queues_events ... ok
-test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests nsh_widgets
+
+running 1 test
 test src/lib.rs - (line 9) - compile ... ok
+
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.81s; merged doctests compilation took 0.36s
+WARNING: No rustdoc doctest environment variable provided so doctests will be run in the same process

@@ -1,4 +1,4 @@
-//! Linux, Windows and the web: no system widget host draws these widgets. The store lives in a
+//! Linux, Windows and the web: no system API draws these widgets. The store lives in a
 //! directory that `nsh-widgets show` reads (for terminals and status bars such as Waybar):
 //! `NSH_WIDGETS_DIR` when set, else `<data dir>/nsh-widgets/<group>` once the app calls
 //! `configure(group)`. The data dir is `$XDG_DATA_HOME` or `~/.local/share`, `%LOCALAPPDATA%` on Windows.

@@ -7,6 +7,7 @@ The app describes each widget once, as a tree of primitives (Widget Tree IR v1),
 - iOS and macOS: SwiftUI in a WidgetKit extension. The renderer is one Swift file, [`crates/nsh-widgets-cli/renderer/NshWidgets.swift`](crates/nsh-widgets-cli/renderer/NshWidgets.swift), compiled into the app's extension by `nsh-widgets build`. iOS lock-screen widgets (circular, rectangular, inline) take a smaller tree of their own.
 - Android: RemoteViews, from Java in the crate's AAR ([`android/`](android/)).
 - KDE Plasma: a generated plasmoid whose QML renderer ([`crates/nsh-widgets-cli/plasma/NshNode.qml`](crates/nsh-widgets-cli/plasma/NshNode.qml)) draws the same tree.
+- GNOME Shell: a generated extension ([`crates/nsh-widgets-cli/gnome/extension.js`](crates/nsh-widgets-cli/gnome/extension.js)) draws the small tree in the top bar and the full tree in its popup.
 - Terminals and Linux status bars: `nsh-widgets show` prints a widget as text or Waybar JSON.
 
 The same trees drive iOS Live Activities (lock screen and Dynamic Island). Widgets can offer the user a choice of values (an edit sheet on iOS and macOS, a configure screen on Android), draw lists (scrolling on Android 12+ and KDE), and an app can add iOS 18 Control Center controls and Android Quick Settings tiles bound to a widget's data.
@@ -20,7 +21,7 @@ Part of the SuperNSH set of optional NSH libraries. Repository: https://github.c
 In the app's directory:
 
 ```sh
-nsh add github:SuperNSH/widgets@^0.2
+nsh add github:SuperNSH/widgets@^0.3
 ```
 
 That lists it in `nsh.json` and pins it in `nsh.lock`:
@@ -43,20 +44,21 @@ cargo install --git https://github.com/SuperNSH/widgets nsh-widgets-cli
 
 ## Status
 
-Version 0.2.1. Verified on 23 and 24 November 2026; details and screenshots in [docs/status.md](docs/status.md).
+Version 0.3.0. Verified on 23 and 24 November 2026; details and screenshots in [docs/status.md](docs/status.md).
 
 - **iOS 27 simulator**: the gallery's kinds list in the widget gallery and draw on the home screen; widget presses reach the app. Lock-screen widgets were placed and drawn ([screenshot](docs/evidence/ios/lock-screen-placed.png)). The Order Live Activity started from the app and showed in the compact and expanded Dynamic Island and as a lock-screen banner, and an update moved it to "On the way". The Weather edit sheet offered Karachi, London and Tokyo, and London drew London's data. The Agenda list drew 12 items. Both controls listed in the Control Center gallery; Count +1 placed there moved the Counter widget to 5.
 - **Android 17 (API 37) emulator**: the Agenda list drew all 12 items and scrolled when the widget was made smaller. Weather's configure screen switched it to Tokyo. The Quick Settings tiles changed Counter and toggled a task, and the app received the presses.
 - **KDE Plasma 5.27 and 6.3** (Ubuntu 24.04 and Debian 13, `plasmoidviewer`): Dashboard, Tasks and Agenda drew from the app's store; a button raised the streak and queued an event, a task toggled, the list scrolled and kept its place. In a panel it draws the small tree (fixed in 0.2.1).
 - **macOS**: 0.1.0's Tasks, Dashboard and Focus timer render on the desktop ([screenshot](docs/evidence/macos/tasks-dashboard.png)). The 0.2.0 extension builds with options; their rendering on a Mac is unverified.
-- **GNOME, other Linux desktops, Windows**: no widget host. `nsh-widgets show --group NAME --follow` prints a widget for a terminal or, with `--format waybar`, for Waybar.
+- **GNOME Shell 48.7** (Debian 13, nested): Dashboard, Tasks and Agenda drew from the store; a button raised the streak, a task toggled, the list scrolled and kept its place, and the popup followed the light or dark setting. GNOME 45 to 47 are listed but not run.
+- **Other Linux desktops, Windows**: no widget host. `nsh-widgets show --group NAME --follow` prints a widget for a terminal or, with `--format waybar`, for Waybar.
 - **Physical iPhone and Android devices**: not tested.
 
-Tests: `cargo test --workspace` runs 10 store tests and 19 CLI tests; `nsh test` in `packages/nsh-widgets` runs 15 TS tests. Output is in `docs/evidence/tests/`. Each suite was seen to fail once against deliberately broken code. CI runs format, clippy and tests on Linux, macOS and Windows, cross-checks iOS, Android and web, checks the committed Android AAR against its sources, builds the gallery's widget extensions on macOS, type-checks the gallery with NSH nightly, generates a Plasma 5 and a Plasma 6 plasmoid (without loading them), and runs the TS checks.
+Tests: `cargo test --workspace` runs 10 store tests and 20 CLI tests; `nsh test` in `packages/nsh-widgets` runs 15 TS tests. Output is in `docs/evidence/tests/`. Each suite was seen to fail once against deliberately broken code. CI runs format, clippy and tests on Linux, macOS and Windows, cross-checks iOS, Android and web, checks the committed Android AAR against its sources, builds the gallery's widget extensions on macOS, type-checks the gallery with NSH nightly, generates a Plasma 5 and a Plasma 6 plasmoid and a GNOME extension (without loading them), and runs the TS checks.
 
 Not in this release:
 
-- A GNOME Shell host and a Windows widget host; `show` covers terminals and Waybar
+- A Windows widget host, and hosts for other Linux desktops; `show` covers terminals and Waybar
 - Runs on physical devices
 - A crates.io and npm release (NSH installs from the git tags)
 
@@ -67,12 +69,13 @@ Not in this release:
 - Android API 26 or later. Switches, light and dark colours, corner radius, icon sizing and scrolling lists need API 31.
 - Live Activities need iOS 16.2 or later; controls need iOS 18.
 - KDE Plasma 5 or 6 with `kpackagetool5` or `kpackagetool6`, and the `nsh-widgets` binary on the machine the plasmoid runs on.
+- GNOME Shell 45 or later (48.7 tested) and the `nsh-widgets` binary on the machine the extension runs on.
 
 ## Layout
 
 - `src/`, `swift/`, `android/`, `build.rs`, `Cargo.toml`, `nsh.json` (repo root): the nshm. The shared store, the Rust API, the TSX native module `nsh-widgets/native`, the Swift bridge, JNI for Android, and the Android AAR with its sources.
 - `packages/nsh-widgets/`: the TypeScript the nshm exports. `base` (primitives and the class resolver), `kit` (styled components built from base), and the `Widgets` API, with its tests.
-- `crates/nsh-widgets-cli/`: the `nsh-widgets` command (`init`, `build`, `check`, `preview`, `show`, `apply`, `plasmoid`, `doctor`), the Swift renderer and Live Activity it compiles into each app's extension (`renderer/`), and the KDE Plasma QML (`plasma/`).
+- `crates/nsh-widgets-cli/`: the `nsh-widgets` command (`init`, `build`, `check`, `preview`, `show`, `apply`, `plasmoid`, `gnome`, `doctor`), the Swift renderer and Live Activity it compiles into each app's extension (`renderer/`), the KDE Plasma QML (`plasma/`) and the GNOME Shell extension (`gnome/`).
 - `examples/gallery/`: an NSH TSX app with eight kinds (Counter, Dashboard, Focus timer, Tasks, Steps, Icons, Agenda, Weather), the Order Live Activity and two controls.
 - `scripts/`: `build-aar.sh` rebuilds the AAR; `check-aar.sh` checks the committed one matches its sources.
 - `docs/`: [getting-started.md](docs/getting-started.md), [ir.md](docs/ir.md), [capabilities.md](docs/capabilities.md), [decisions.md](docs/decisions.md), [status.md](docs/status.md), and `evidence/`.

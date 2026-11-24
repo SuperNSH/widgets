@@ -68,8 +68,9 @@ pub fn write(args: &Args) -> anyhow::Result<()> {
     std::fs::write(out.join("config.json"), pretty(&config(kind, &command, &source))?)?;
     std::fs::write(out.join("extension.js"), EXTENSION)?;
     println!("wrote {}", out.display());
+    let dir = format!("~/.local/share/gnome-shell/extensions/{id}");
     println!(
-        "install: cp -r {} ~/.local/share/gnome-shell/extensions/{id}",
+        "install: mkdir -p {dir} && cp -r {}/. {dir}",
         crate::plasma::shell_word(&out.to_string_lossy())
     );
     println!("then log out and in, and run: gnome-extensions enable {id}");

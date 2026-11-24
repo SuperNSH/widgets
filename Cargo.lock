@@ -813,7 +813,7 @@ dependencies = [
 
 [[package]]
 name = "nsh-widgets"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "jni",
  "ndk-context",
@@ -825,7 +825,7 @@ dependencies = [
 
 [[package]]
 name = "nsh-widgets-cli"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "serde",

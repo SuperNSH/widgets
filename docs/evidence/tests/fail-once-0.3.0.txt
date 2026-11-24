@@ -1,0 +1,17 @@
+# Deliberately broken code, 24 November 2026: the new 0.3.0 test failing, once per break
+## uuid keeps unsafe characters
+tests::gnome_extensions_have_a_valid_id_and_run_no_shell --- FAILED
+thread 'tests::gnome_extensions_have_a_valid_id_and_run_no_shell' (154337442) panicked at crates/nsh-widgets-cli/src/tests.rs:454:5:
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.00s
+## no kind check
+tests::gnome_extensions_have_a_valid_id_and_run_no_shell --- FAILED
+thread 'tests::gnome_extensions_have_a_valid_id_and_run_no_shell' (154337665) panicked at crates/nsh-widgets-cli/src/tests.rs:479:5:
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.00s
+## source joined into one argument
+tests::gnome_extensions_have_a_valid_id_and_run_no_shell --- FAILED
+thread 'tests::gnome_extensions_have_a_valid_id_and_run_no_shell' (154337857) panicked at crates/nsh-widgets-cli/src/tests.rs:468:5:
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.00s
+## always rebuild
+tests::gnome_extensions_have_a_valid_id_and_run_no_shell --- FAILED
+thread 'tests::gnome_extensions_have_a_valid_id_and_run_no_shell' (154338035) panicked at crates/nsh-widgets-cli/src/tests.rs:474:5:
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.00s

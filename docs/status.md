@@ -1,6 +1,6 @@
 # Status
 
-Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery`](../examples/gallery)). Screenshots are under [`evidence/`](evidence/). The current version is 0.2.1; its own section is [below](#24-november-2026-020).
+Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery`](../examples/gallery)). Screenshots are under [`evidence/`](evidence/). The current version is 0.3.0; its own section is [below](#24-november-2026-030).
 
 ## Summary
 
@@ -17,7 +17,8 @@ Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery
 | KDE Plasma 6.3 | Verified in 0.2.0 in `plasmoidviewer` on Debian 13: Dashboard and a button press (streak 13 to 14, [plasma6-dashboard-after-button.jpg](evidence/kde/plasma6-dashboard-after-button.jpg)), a task toggled ([plasma6-tasks-toggled.jpg](evidence/kde/plasma6-tasks-toggled.jpg)), and the Agenda list scrolled and still in place seven seconds later ([plasma6-agenda-scrolled.jpg](evidence/kde/plasma6-agenda-scrolled.jpg)). This run found two bugs, fixed before release and rechecked on Plasma 5.27: a list grew the widget instead of scrolling, and each two-second read reset its scroll. |
 | Physical iPhone | Not tested. |
 | Physical Android device | Not tested. |
-| GNOME, other Linux desktops, Windows | No widget host. `nsh-widgets show` draws a widget as text or Waybar JSON; checked on macOS against the simulator's store ([show.txt](evidence/tests/show.txt)). The Linux and Windows store paths are covered by code review only. |
+| GNOME Shell 48.7 | Verified in 0.3.0, nested on Debian 13: drawing, a button press, a toggle, the Agenda list scrolled, light and dark, timers. Other versions and a full session are unverified. |
+| Other Linux desktops, Windows | No widget host. `nsh-widgets show` draws a widget as text or Waybar JSON; checked on macOS against the simulator's store ([show.txt](evidence/tests/show.txt)). The Linux and Windows store paths are covered by code review only. |
 | Web | No store. |
 
 ## iOS 27 simulator
@@ -83,8 +84,29 @@ The Ubuntu machine's clock in these screenshots reads 23 November, 21:22 to 21:2
 
 - macOS rendering of options and lists. The Mac extension builds with the generated option intents; nothing was placed on a Mac.
 - A full Plasma session: both KDE forms were seen only in `plasmoidviewer`. The panel form was broken in 0.2.0; in 0.2.1, with a hand-written Steps tree, it drew the `accessory` tree and followed the data on Plasma 5.27 and 6.3, and on 5.27 a click opened the full widget ([panel-opened.png](evidence/kde/panel-opened.png); the viewer paints no panel behind it, so the text is dark on black).
-- GNOME: no host. `show` and Waybar cover it.
+- GNOME: no host in 0.2; 0.3.0 adds one.
 - Physical iPhone and Android devices: none was connected, and `nsh-widgets doctor --app` on the gallery reported no provisioning profiles for the app or its extension.
+
+## 24 November 2026: 0.3.0
+
+### GNOME Shell 48.7 (Debian 13, nested)
+
+`gnome-shell --nested --wayland --no-x11` in a chroot on an Ubuntu 24.04 cloud machine, software rendering, with extensions written by `nsh-widgets gnome` and a store with the gallery's data. Steps and Kinds (timers, a clock, `rotate`, an `open:` button, an unknown node) were hand-written trees.
+
+- Dashboard's popup drew the gradient banner, the progress bar, the bars, the glyphs and the buttons. "+1 day" raised the streak from 13 to 14 in the store and the popup, and queued the event in `actions.jsonl` ([dashboard-after-press.png](evidence/gnome/dashboard-after-press.png)). The bar drew Steps' `accessory` tree.
+- Tasks: "Update the plan" turned on in the popup and the store ([tasks-toggled.png](evidence/gnome/tasks-toggled.png)).
+- Agenda scrolled to 14:00 to 19:00 and was still there six seconds (about three polls) later ([agenda-scrolled.png](evidence/gnome/agenda-scrolled.png)).
+- Setting `color-scheme` to `prefer-dark` while the popup was open redrew it dark ([dashboard-dark-live.png](evidence/gnome/dashboard-dark-live.png)). That run used GSettings' keyfile backend: with dconf in this chroot, the shell itself did not see changes made while it ran.
+- Both timers counted, the clock drew, `rotate` alternated between its children, and the unknown node was skipped ([timers-clock-rotate.png](evidence/gnome/timers-clock-rotate.png)).
+- A kind with no store draws "Open the app to set up this widget" ([empty-store.png](evidence/gnome/empty-store.png)).
+- `open:` with a URL nothing handles closed the popup and logged a warning. A URL that has a handler was not tried.
+- All six extensions went through disable and enable with no JavaScript error in the shell's log.
+- Found and fixed here: a timer inside `rotate` went on writing to its destroyed label.
+
+### Not verified in 0.3.0
+
+- A full GNOME session (not nested), GNOME 45 to 47, and any version after 48.
+- The Counter, Focus timer, Icons and Weather kinds on GNOME: the store did not hold them.
 
 ## Tests
 
@@ -94,13 +116,13 @@ The Ubuntu machine's clock in these screenshots reads 23 November, 21:22 to 21:2
 | `nsh test` in `packages/nsh-widgets` | 15 tests pass: 12 in [`base.test.ts`](../packages/nsh-widgets/tests/base.test.ts), 3 in [`kit.test.ts`](../packages/nsh-widgets/tests/kit.test.ts). |
 | `scripts/check-aar.sh` | The committed AAR matches its sources; a planted extra drawable made it fail, and so did an edit to a Java file (it compares a hash of the sources). |
 
-Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence/tests/nsh-test.txt). Each suite was seen to fail once against deliberately broken code: in 0.1.0 the action inbox, the `nsh.json` writer, the action check in `base.ts` and the toggle in the text renderer; in 0.2.0 removing `list` from the store's node types, dropping the tile entries from the generated Android manifest, and one break for each other new test ([fail-once-0.2.0.txt](evidence/tests/fail-once-0.2.0.txt)). The Swift, Java and QML renderers are covered only by the simulator, emulator and Plasma runs above. CI is defined in `.github/workflows/ci.yml`.
+Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence/tests/nsh-test.txt). Each suite was seen to fail once against deliberately broken code: in 0.1.0 the action inbox, the `nsh.json` writer, the action check in `base.ts` and the toggle in the text renderer; in 0.2.0 removing `list` from the store's node types, dropping the tile entries from the generated Android manifest, and one break for each other new test ([fail-once-0.2.0.txt](evidence/tests/fail-once-0.2.0.txt)). The 0.3.0 test was seen to fail four ways ([fail-once-0.3.0.txt](evidence/tests/fail-once-0.3.0.txt)). The Swift, Java, QML and GNOME renderers are covered only by the simulator, emulator, Plasma and GNOME runs above. CI is defined in `.github/workflows/ci.yml`.
 
 ## Not done
 
-- A GNOME Shell host and a Windows widget host; `show` covers terminals and Waybar
+- A Windows widget host, and the other Linux hosts in the plan (Cinnamon, COSMIC, layer-shell, X11); `show` covers terminals and Waybar
 - Tests on physical devices
-- A full Plasma session
+- A full Plasma session and a full GNOME session
 - macOS runs of options and lists
 - A crates.io and npm release (NSH installs from the git tags)
 

@@ -427,26 +427,66 @@ fn plasmoids_name_their_command_and_store() {
     );
 }
 
-#[test]
-fn apply_runs_actions_on_a_store_and_queues_events() {
-    let dir = tempfile::tempdir().unwrap();
-    let args = crate::Args {
-        command: "apply".into(),
-        app: dir.path().into(),
+/// Arguments for a command on the store in `dir`.
+fn store_args(dir: &std::path::Path, command: &str, kind: &str) -> crate::Args {
+    crate::Args {
+        command: command.into(),
+        app: dir.into(),
         only: vec![],
         group: None,
         source: crate::source::Source {
-            dir: Some(dir.path().into()),
+            dir: Some(dir.into()),
             ..Default::default()
         },
         out: None,
         format: "text".into(),
         follow: false,
-        kind: Some("Tasks".into()),
+        kind: Some(kind.into()),
         extra: None,
         plasma: 6,
         exe: None,
-    };
+    }
+}
+
+#[test]
+fn gnome_extensions_have_a_valid_id_and_run_no_shell() {
+    let id = crate::gnome::uuid("dev.example app/$(x)", "My_Steps");
+    assert_eq!(id, "dev.example-app---x-.my_steps@widgets.supernsh.dev");
+    let dir = tempfile::tempdir().unwrap();
+    let mut args = store_args(dir.path(), "gnome", "Steps");
+    args.group = Some("dev.example.app".into());
+    args.exe = Some("/opt/my tools/nsh-widgets".into());
+    args.out = Some(dir.path().join("out"));
+    crate::gnome::write(&args).unwrap();
+    let read = |f: &str| std::fs::read_to_string(dir.path().join("out").join(f)).unwrap();
+    let parse = |f: &str| serde_json::from_str::<serde_json::Value>(&read(f)).unwrap();
+    let meta = parse("metadata.json");
+    assert_eq!(meta["uuid"], "dev.example.app.steps@widgets.supernsh.dev");
+    assert_eq!(meta["name"], "Steps");
+    assert!(meta["shell-version"].as_array().unwrap().contains(&json!("48")));
+    // The program and its arguments stay apart, so no quoting is involved.
+    assert_eq!(
+        parse("config.json"),
+        json!({ "kind": "Steps", "command": "/opt/my tools/nsh-widgets", "source": ["--group", "dev.example.app"] })
+    );
+    let js = read("extension.js");
+    assert!(js.contains("Gio.Subprocess.new([this._config.command, ...args]") && !js.contains("spawn_command_line"));
+    assert!(
+        js.contains("if (key === this._last) return"),
+        "unchanged data must not rebuild the tree"
+    );
+    args.kind = Some("../x".into());
+    assert!(crate::gnome::write(&args).is_err());
+    args.kind = Some("Steps".into());
+    args.group = None;
+    args.source.dir = None;
+    assert!(crate::gnome::write(&args).is_err());
+}
+
+#[test]
+fn apply_runs_actions_on_a_store_and_queues_events() {
+    let dir = tempfile::tempdir().unwrap();
+    let args = store_args(dir.path(), "apply", "Tasks");
     crate::source::apply(&args, "toggle:t1").unwrap();
     crate::source::apply(&args, "inc:n").unwrap();
     crate::source::apply(&args, "inc:n").unwrap();

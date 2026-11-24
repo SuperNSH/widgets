@@ -9,7 +9,7 @@ Before you start, check [Requirements](../README.md#requirements): the NSH 0.6.0
 In the app's directory:
 
 ```sh
-nsh add github:SuperNSH/widgets@^0.2
+nsh add github:SuperNSH/widgets@^0.3
 ```
 
 `nsh.json` then lists it, and `nsh.lock` pins the version:
@@ -286,7 +286,7 @@ A press writes `data.json`, appends an event to `actions.jsonl` like a widget bu
 
 ## Linux and Windows
 
-The app keeps a store on the desktop once it names it. KDE Plasma can draw it with a generated plasmoid ([below](#kde-plasma)); GNOME and Windows have no widget host for it, and `nsh-widgets show` prints it instead.
+The app keeps a store on the desktop once it names it. KDE Plasma can draw it with a generated plasmoid ([below](#kde-plasma)) and GNOME Shell with a generated extension ([below](#gnome-shell)); Windows has no widget host for it, and `nsh-widgets show` prints it instead.
 
 Naming the store:
 
@@ -337,6 +337,27 @@ Then add it from the desktop's or panel's widget list. Options:
 The package holds `metadata.json`, `contents/ui/main.qml` and `contents/ui/NshNode.qml`, a generic QML renderer of the IR. Every two seconds it runs `nsh-widgets show KIND --group NAME --format ir` through Plasma's executable data engine and redraws when something changed; a button press runs `nsh-widgets apply`. On the desktop it draws the `root` tree; in a panel it draws the `accessory` tree and opens the full widget when clicked. Light or dark follows the Plasma theme.
 
 The app must call `Widgets.configure(NAME)` on Linux so its store is `$XDG_DATA_HOME/nsh-widgets/NAME`, and the machine needs the `nsh-widgets` binary.
+
+## GNOME Shell
+
+GNOME has no desktop widgets, so a kind becomes a top-bar button with a popup. `nsh-widgets gnome` writes a GNOME Shell extension for one kind:
+
+```sh
+nsh-widgets gnome Dashboard --group dev.example.app --out dashboard
+```
+
+It prints the two steps that follow: copying the directory to `~/.local/share/gnome-shell/extensions/<id>`, and, after logging out and in, `gnome-extensions enable <id>`. Options:
+
+| Option | Meaning |
+|---|---|
+| `--group NAME` | The store, as the app's `Widgets.configure(NAME)` named it. `--dir ROOT` instead names a store root. |
+| `--out DIR` | Where to write the extension. Default `.nsh-widgets/gnome/<id>`, where the id is `<group>.<kind in lower case>@widgets.supernsh.dev`. |
+| `--command PATH` | The `nsh-widgets` the extension runs. Default: the path of the one that wrote it. |
+| `--app DIR` | Where `widgets.json` is, for the widget's name and description. Optional. |
+
+The bar draws the kind's `accessory` tree, or its name when it has none; the popup draws the `root` tree. The extension runs `nsh-widgets show KIND --group NAME --format ir` every two seconds and redraws when something changed; a press runs `nsh-widgets apply`. Both run as a program with arguments, with no shell. Light or dark follows GNOME's Dark Style.
+
+The metadata lists GNOME 45 to 48. Only 48.7 has been run.
 
 ## Platform notes
 
