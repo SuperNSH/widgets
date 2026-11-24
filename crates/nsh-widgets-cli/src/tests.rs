@@ -463,7 +463,7 @@ fn gnome_extensions_have_a_valid_id_and_run_no_shell() {
     let meta = parse("metadata.json");
     assert_eq!(meta["uuid"], "dev.example.app.steps@widgets.supernsh.dev");
     assert_eq!(meta["name"], "Steps");
-    assert!(meta["shell-version"].as_array().unwrap().contains(&json!("48")));
+    assert_eq!(meta["shell-version"], json!(["45", "46", "47", "48", "49", "50", "51"]));
     // The program and its arguments stay apart, so no quoting is involved.
     assert_eq!(
         parse("config.json"),

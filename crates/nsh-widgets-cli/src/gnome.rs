@@ -9,8 +9,9 @@ use serde_json::{Value, json};
 use crate::Args;
 
 const EXTENSION: &str = include_str!("../gnome/extension.js");
-/// GNOME 45 moved extensions to ES modules, which this one is.
-const SHELL_VERSIONS: &[&str] = &["45", "46", "47", "48"];
+/// The versions it has been run on (docs/status.md). GNOME 45 moved extensions to ES modules, which this
+/// one is, and GNOME turns an extension off on a version it does not list.
+const SHELL_VERSIONS: &[&str] = &["45", "46", "47", "48", "49", "50", "51"];
 
 /// The extension's id: letters, digits, dots, dashes and underscores before the `@`, as GNOME asks.
 pub fn uuid(source: &str, kind: &str) -> String {

@@ -158,8 +158,9 @@ class Renderer {
                 if (a) rows.add_child(a);
             }
             const view = new St.ScrollView({x_expand: true, style: 'max-height: 160px;', hscrollbar_policy: St.PolicyType.NEVER});
-            if (view.set_child) view.set_child(rows);
-            else view.add_actor(rows);
+            // GNOME 45 has a set_child here too, St.Bin's, and using it aborts the shell when the view goes.
+            if (view.add_actor) view.add_actor(rows);
+            else view.set_child(rows);
             return view;
         }
         default: return null;
