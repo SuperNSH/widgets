@@ -14,7 +14,7 @@ Verified on 23 and 24 November 2026 with the gallery example ([`examples/gallery
 | macOS | Packaged and signed by NSH main (Apple Development identity, team App Group via `macosAppGroup`), installed to `~/Applications`. On the desktop the library's Tasks (checklist rows), Dashboard (gradient banner, progress, bar chart, icons, 9200 steps from the app) and Focus timer (stopwatch, countdown, clock, rotating tip) render with the app's data ([tasks-dashboard.png](evidence/macos/tasks-dashboard.png), [focus-timer.png](evidence/macos/focus-timer.png)). Pressing a Tasks row on the desktop toggled it without the app (reported by the user on 23 November 2026; no screenshot). |
 | macOS, 0.2.0 features | The extension builds with options. Options and lists have not been seen on a Mac: unverified. |
 | KDE Plasma 5.27 | Verified in 0.4.0 in a full session, desktop and panel forms; in 0.2.0 in `plasmoidviewer` on Ubuntu 24.04: Dashboard, a button press, Tasks toggled, the Agenda list scrolled. |
-| KDE Plasma 6.3 | Verified in 0.2.0 in `plasmoidviewer` on Debian 13: Dashboard and a button press (streak 13 to 14, [plasma6-dashboard-after-button.jpg](evidence/kde/plasma6-dashboard-after-button.jpg)), a task toggled ([plasma6-tasks-toggled.jpg](evidence/kde/plasma6-tasks-toggled.jpg)), and the Agenda list scrolled and still in place seven seconds later ([plasma6-agenda-scrolled.jpg](evidence/kde/plasma6-agenda-scrolled.jpg)). This run found two bugs, fixed before release and rechecked on Plasma 5.27: a list grew the widget instead of scrolling, and each two-second read reset its scroll. |
+| KDE Plasma 6.3 | Verified with 0.4.0 in a full session, desktop and panel forms; in 0.2.0 in `plasmoidviewer` on Debian 13: Dashboard and a button press (streak 13 to 14, [plasma6-dashboard-after-button.jpg](evidence/kde/plasma6-dashboard-after-button.jpg)), a task toggled ([plasma6-tasks-toggled.jpg](evidence/kde/plasma6-tasks-toggled.jpg)), and the Agenda list scrolled and still in place seven seconds later ([plasma6-agenda-scrolled.jpg](evidence/kde/plasma6-agenda-scrolled.jpg)). This run found two bugs, fixed before release and rechecked on Plasma 5.27: a list grew the widget instead of scrolling, and each two-second read reset its scroll. |
 | Physical iPhone | Not tested. |
 | Physical Android device | Not tested. |
 | GNOME Shell 45 to 51 | Verified in 0.3.0: 48.7 nested with a pointer, all seven headless through a probe: drawing, a button press, a toggle, the Agenda list scrolled, light and dark, timers, disable and enable. A full session is unverified. |
@@ -137,14 +137,20 @@ The store and the hand-written Kinds tree are 0.3.0's. Presses here are a pointe
 
 `startplasma-x11` on a virtual X display. The desktop form (Dashboard, Tasks, Agenda) and the panel form (Steps) drew; the press, the toggle and the scroll as above ([session-pressed.png](evidence/kde/session-pressed.png)); clicking the panel opened the full widget ([session-panel-opened.png](evidence/kde/session-panel-opened.png)); Breeze Dark redrew them ([session-dark.png](evidence/kde/session-dark.png)); removing them left the shell running.
 
+### KDE Plasma 6.3, full session, and KWin (after the release)
+
+- Plasma 6.3.6 (Debian 13), `startplasma-x11` on a virtual X display: the desktop and panel forms drew, a press and a toggle reached the store, Agenda scrolled and kept its place, and clicking the panel opened the full widget ([session-plasma6.png](evidence/kde/session-plasma6.png)). The session was dark throughout; switching the scheme while running was not seen on 6.
+- Layer-shell on KWin 6.3.6 (`kwin_wayland` nested on X11): three windows drew; a press raised the streak, a toggle turned a row on, and `prefer-dark` redrew them ([kwin-before-and-after.png](evidence/window/kwin-before-and-after.png)). Scrolling was not checked there.
+- labwc 0.8.3 and wayfire 0.9 did not start in the chroot (labwc crashed before any window), so they are unverified.
+
 ### GNOME
 
 The renderer was split into shared files, so the probe ran again on all seven versions, with the same results.
 
 ### Not verified in 0.4.0
 
-- Hyprland, COSMIC, KWin and other layer-shell compositors; X11 desktops other than Xfce.
-- Plasma 6 in a full session (6.3 only in `plasmoidviewer`), and a full GNOME session.
+- Hyprland, COSMIC, labwc, wayfire and other layer-shell compositors; X11 desktops other than Xfce.
+- A full GNOME session.
 - Several monitors, and fractional scaling.
 
 ## Tests
@@ -161,7 +167,7 @@ Output: [cargo-test.txt](evidence/tests/cargo-test.txt), [nsh-test.txt](evidence
 
 - A Windows widget host and a COSMIC applet; `show` covers terminals and Waybar
 - Tests on physical devices
-- A full Plasma 6 session and a full GNOME session
+- A full GNOME session
 - macOS runs of options and lists
 - A crates.io and npm release (NSH installs from the git tags)
 
