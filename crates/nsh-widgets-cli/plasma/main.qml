@@ -11,6 +11,7 @@ import QtQuick.Layouts 1.15
     property var vals: ({})
     property real now: Date.now()
     property int tick: 0
+    property string last: ""
     readonly property bool dark: Kirigami.Theme.backgroundColor.hslLightness < 0.5
     readonly property string cmd: "@CMD@"
     readonly property string source: "@SOURCE@"
@@ -36,6 +37,10 @@ import QtQuick.Layouts 1.15
             if (sourceName.indexOf(" show ") < 0) { main.refresh(); return }
             try {
                 var j = JSON.parse(data["stdout"])
+                // Rebuild the tree only for a real change: a rebuild puts a scrolled list back at its top.
+                var key = JSON.stringify([j.snapshot, j.data])
+                if (key === main.last) return
+                main.last = key
                 main.snap = j.snapshot
                 main.vals = j.data
             } catch (e) {}

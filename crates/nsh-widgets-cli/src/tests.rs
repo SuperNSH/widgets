@@ -400,6 +400,10 @@ fn plasmoids_name_their_command_and_store() {
     assert!(qml.contains("PlasmoidItem {") && qml.contains("P5Support.DataSource") && !qml.contains('@'));
     assert!(qml.contains("readonly property string cmd: \"'/opt/my tools/nsh-widgets'\""));
     assert!(qml.contains("\" show Steps \"") && qml.contains("\" apply Steps \""));
+    assert!(
+        qml.contains("if (key === main.last) return"),
+        "unchanged data must not rebuild the tree"
+    );
     let five = crate::plasma::main_qml(5, "Steps", "nsh-widgets", "--dir /tmp/s").unwrap();
     assert!(five.contains("PlasmaCore.DataSource") && five.contains("Plasmoid.fullRepresentation"));
     assert!(crate::plasma::main_qml(4, "S", "x", "y").is_err());
