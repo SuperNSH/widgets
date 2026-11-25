@@ -21,7 +21,7 @@ Hard rules for humans and coding agents in this repo.
 - `cargo clippy --all-targets -- -D warnings`
 - `cargo test --workspace`
 - in `packages/nsh-widgets`: `nsh check`, `nsh test`
-- in `examples/gallery`: `nsh check` (NSH main or nightly)
+- in `examples/gallery`: `nsh check` (NSH 0.7.1)
 - for a change that reaches a renderer: build the gallery with `nsh-widgets build`, package it, place the widget, and save a screenshot under `docs/evidence/<platform>/`. For the KDE renderer: `nsh-widgets plasmoid KIND --group NAME`, install it, and screenshot it under `docs/evidence/kde/`
 
 ## Releasing

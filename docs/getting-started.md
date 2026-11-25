@@ -2,7 +2,7 @@
 
 This adds a home-screen widget to an NSH TSX app. The steps match [`examples/gallery`](../examples/gallery), which is the working reference.
 
-Before you start, check [Requirements](../README.md#requirements): the NSH 0.6.0 and 0.6.1 releases have no `nsh add` and cannot package widgets; you need NSH main at or after `5aa56b19`, or the nightly.
+Before you start, check [Requirements](../README.md#requirements): the NSH 0.6.0 and 0.6.1 releases have no `nsh add` and cannot package widgets; you need NSH 0.7.1 or later.
 
 ## 1. Add the library
 

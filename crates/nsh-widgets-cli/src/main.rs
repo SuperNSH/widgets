@@ -307,9 +307,7 @@ fn doctor(app: &Path) -> anyhow::Result<()> {
         println!("--   Apple extensions build only on macOS; Android needs nothing beyond nsh");
     }
     probe("nsh", Command::new("nsh").arg("--version"));
-    println!(
-        "note packaging widget extensions needs NSH main at or after 5aa56b19 (23 November 2026) or the nightly; the 0.6.0 and 0.6.1 releases cannot"
-    );
+    println!("note packaging widget extensions needs NSH 0.7.1 or later; the 0.6.0 and 0.6.1 releases cannot");
     if cfg!(target_os = "macos") {
         signing::report(app);
     }

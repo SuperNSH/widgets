@@ -60,7 +60,7 @@ Version 0.4.1. Verified on 23 and 24 November 2026; details and screenshots in [
 - **Windows, and Wayland compositors without layer-shell**: no widget host. `nsh-widgets show --group NAME --follow` prints a widget for a terminal or, with `--format waybar`, for Waybar.
 - **Physical iPhone and Android devices**: not tested.
 
-Tests: `cargo test --workspace` runs 10 store tests and 21 CLI tests; `nsh test` in `packages/nsh-widgets` runs 15 TS tests. Output is in `docs/evidence/tests/`. Each suite was seen to fail once against deliberately broken code. CI runs format, clippy and tests on Linux, macOS and Windows, cross-checks iOS, Android and web, checks the committed Android AAR against its sources, builds the gallery's widget extensions on macOS, type-checks the gallery with NSH nightly, generates a Plasma 5 and a Plasma 6 plasmoid, a GNOME extension, a Cinnamon desklet and a desktop window (without loading them), and runs the TS checks.
+Tests: `cargo test --workspace` runs 10 store tests and 21 CLI tests; `nsh test` in `packages/nsh-widgets` runs 15 TS tests. Output is in `docs/evidence/tests/`. Each suite was seen to fail once against deliberately broken code. CI runs format, clippy and tests on Linux, macOS and Windows, cross-checks iOS, Android and web, checks the committed Android AAR against its sources, builds the gallery's widget extensions on macOS, type-checks the gallery with NSH 0.7.1, generates a Plasma 5 and a Plasma 6 plasmoid, a GNOME extension, a Cinnamon desklet and a desktop window (without loading them), and runs the TS checks.
 
 Not in this release:
 
@@ -70,7 +70,7 @@ Not in this release:
 
 ## Requirements
 
-- NSH main at or after commit `5aa56b19` (23 November 2026), or the nightly. It needs `ios.extensions` and `macos.extensions` in `nsh.json` (longbridge/nsh#2879), `android.libraries`, and the AAR manifest merge. The 0.6.0 and 0.6.1 releases have none of these.
+- NSH 0.7.1 or later. It needs `ios.extensions` and `macos.extensions` in `nsh.json`, `android.libraries`, and the AAR manifest merge. The 0.6.0 and 0.6.1 releases have none of these.
 - For Apple targets: macOS with Xcode 26 or later, including `appintentsmetadataprocessor`. Tested with Xcode 27.0 (27A266a). `nsh-widgets doctor` checks the tools.
 - Android API 26 or later. Switches, light and dark colours, corner radius, icon sizing and scrolling lists need API 31.
 - Live Activities need iOS 16.2 or later; controls need iOS 18.

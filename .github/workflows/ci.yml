@@ -113,7 +113,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install NSH
         env:
-          NSH_VERSION: v0.6.1
+          NSH_VERSION: v0.7.1
         run: |
           curl -fsSL https://raw.githubusercontent.com/SuperNSH/nsh-builds/master/install.sh | sh
           echo "$HOME/.nsh/bin" >> "$GITHUB_PATH"
@@ -126,16 +126,16 @@ jobs:
           ! grep -i warn build.log
           nsh test
 
-  # The gallery imports the library by name (the repo root is an nshm with TSX exports), which needs
-  # NSH main: the nightly.
+  # The gallery imports the library by name: the repo root is an nshm with TSX exports, which
+  # NSH 0.7.1 resolves through `nsh add`.
   gallery:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install NSH nightly
+      - name: Install NSH 0.7.1
         env:
-          NSH_VERSION: nightly
+          NSH_VERSION: v0.7.1
         run: |
           curl -fsSL https://raw.githubusercontent.com/SuperNSH/nsh-builds/master/install.sh | sh
           echo "$HOME/.nsh/bin" >> "$GITHUB_PATH"
